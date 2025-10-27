@@ -9,12 +9,12 @@ double z_const(double) {
 }
 
 double u_1(double x) {
-    // return 1.0;
+    return 1.0;
     // return -1.0; // волны разряжения //discharge_waves
     // return -0.1; //волны рязряжения //hydrajump_dischargewave
     // return 2.0; // гидродинамические прыжки
     // return 1.0; // гидродинамический прыжок и волна разряжения
-    return 0.0;
+    // return 0.0;
 }
 
 
@@ -32,18 +32,20 @@ double h_1(double x) {
     // return 0.5; // волны разряжения //hydrajump_dischargewave
     // return 0.6; // гидродинамические прыжки
     // return 1.0; // гидродинамический прыжок и волна разряжения //discharge_waves
-    return std::exp(-std::pow(x - 10, 2)) + 3;
+    // return std::exp(-std::pow(x - 10, 2)) + 3;
     // return 0.5 + 1.0 / 20.0 * x; 
+    return 2.0 - z_lakes(x);
 }
 
 
 double h_2(double x) {
     // return 0.5; //волны разряжения
     // return 1.0; // волны разряжения //hydrajump_dischargewave //discharge_waves
-    return 0.5; // гидродинамические прыжки
+    // return 0.5; // гидродинамические прыжки
     // return 0.5; // гидродинамический прыжок и волна разряжения
     // return std::exp(-std::pow(x - 10, 2)) + 3;
     // return 1.0 + 1.0 / 20.0 * x; 
+    return 2.0 - z_lakes(x);
 }
 
 

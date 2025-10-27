@@ -6,6 +6,10 @@
 #include "read_matrix.h"
 #include "functions.h"
 #include "boundary_conditions.h"
+#include "file_manager.h"
+
+#include "TECIO.h"
+#include "TECXXX.h"
 
 
 //Тип сетки равномерная или неравномерная
@@ -22,10 +26,6 @@ enum Type_behavior_automodel_solution {DISCHARGE_WAVE, HYDRAULIC_JUMP};
 
 //Тип потоковой величины
 enum Type_value {H, U};
-
-
-//Тип граничного условия
-enum Type_border_cond {NON_LEAK, FREE_EXIT};
 
 
 /*
@@ -127,11 +127,6 @@ private:
     void third_phase(int);
 
     //
-
-
-    //Сохранение данных
-    void save_layer(std::ofstream&, int, int, Row&, Row&, Row&, Row&);
-
 
 
     void save_error(std::string const&, int, Row&, Row&);
@@ -293,18 +288,7 @@ private:
     
     //Имя файла куда записываются данные
     std::string file_name;
-
-
-    std::ofstream file_out;
-
-
-    std::ofstream file_out_conservative;
-
-
-    std::ofstream file_out_analytical;
-
-
-    std::ofstream file_out_analytical_conservative;
+    FileManager file_manager;
 
     //Решаем непрерывную задачу?
     bool continuity;
@@ -554,28 +538,16 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
 
     }
 
+    //Начальный индекс по времени нулевой
+    int t_idx = 0;
 
     if (!file_name.empty()) {
 
-        file_out.open(file_name + ".dat");
-        file_out_conservative.open(file_name + "_conservative.dat");
-        save_layer(file_out, cnt_x_pts, 0, stream_h_grid, stream_z_grid, x_grid, stream_u_grid);
-        save_layer(file_out_conservative, cnt_x_pts - 1, 0, conservative_h_grid, conservative_z_grid, conservative_x_grid, conservative_u_grid);
-        if (analytical_solution) {
-
-            file_out_analytical.open(file_name + "_analytical.dat");
-            file_out_analytical_conservative.open(file_name + "_analytical_conservative.dat");
-            save_layer(file_out_analytical, cnt_x_pts, 0, analytical_solution_stream_h_grid, stream_z_grid, x_grid, analytical_solution_stream_u_grid);
-            save_layer(file_out_analytical_conservative, cnt_x_pts - 1, 0, analytical_solution_conservative_h_grid, conservative_z_grid, x_grid
-                       , analytical_solution_conservative_u_grid);
-
-        }
+        file_manager.init_file(file_name + ".plt", 0, cnt_x_pts - 1);
+        file_manager.save_layer(t_grid[0], conservative_x_grid, conservative_h_grid, conservative_u_grid, conservative_z_grid);
 
     }
 
-    
-    //Начальный индекс по времени нулевой
-    int t_idx = 0;
 
     //Цикл по всему времени
     while(t_grid[t_idx] != end_t_pt) {
@@ -596,9 +568,29 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
 
         ++t_idx;
 
-        if (analytical_solution) {
+        if (tau_grid[t_idx - 1] != 0.0 and !file_name.empty()) {
+            file_manager.save_layer(t_grid[t_idx], conservative_x_grid, conservative_h_grid, conservative_u_grid, conservative_z_grid);
+        }
 
-            std::pair<double, double> analytical_solution_values;
+    }
+
+    if (!file_name.empty()) {
+        file_manager.end_file();
+    }
+
+    if (analytical_solution) {
+        
+        if (!file_name.empty()) {
+
+            file_manager.init_file(file_name + "_analytical.plt", 0, cnt_x_pts - 1);
+            file_manager.save_layer(t_grid[0], conservative_x_grid, analytical_solution_conservative_h_grid, analytical_solution_conservative_u_grid
+                                  , conservative_z_grid);
+
+        }
+        std::pair<double, double> analytical_solution_values;
+        cnt_t_pts = t_grid.size();
+        for(int t_idx = 1; t_idx < cnt_t_pts; ++t_idx) {
+
             for(int i = 0; i < (cnt_x_pts - 1); ++i) {
 
                 analytical_solution_values = analytical_solution(x_grid[i], t_grid[t_idx]);
@@ -613,41 +605,20 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
             analytical_solution_values = analytical_solution(x_grid[cnt_x_pts - 1], t_grid[t_idx]);
             analytical_solution_stream_h_grid[cnt_x_pts - 1] = analytical_solution_values.first;
             analytical_solution_stream_u_grid[cnt_x_pts - 1] = analytical_solution_values.second;
-
-        }
-
-        if (tau_grid[t_idx - 1] != 0.0 and !file_name.empty()) {
-
-            save_layer(file_out, cnt_x_pts, t_idx, stream_h_grid, stream_z_grid, x_grid, stream_u_grid);
-            save_layer(file_out_conservative, cnt_x_pts - 1, t_idx, conservative_h_grid, conservative_z_grid, conservative_x_grid
-                       , conservative_u_grid);
-            if (analytical_solution) {
-
-                save_layer(file_out_analytical, cnt_x_pts, t_idx, analytical_solution_stream_h_grid, stream_z_grid, x_grid
-                           , analytical_solution_stream_u_grid);
-                save_layer(file_out_analytical_conservative, cnt_x_pts - 1, t_idx, analytical_solution_conservative_h_grid, conservative_z_grid
-                           , conservative_x_grid, analytical_solution_conservative_u_grid);
+        
+            if (tau_grid[t_idx - 1] != 0.0 and !file_name.empty()) {
+                file_manager.save_layer(t_grid[t_idx], conservative_x_grid, analytical_solution_conservative_h_grid
+                                      , analytical_solution_conservative_u_grid, conservative_z_grid);
 
             }
 
         }
 
-    }
-
-    if (!file_name.empty()) {
-
-        file_out.close();
-        file_out_conservative.close();
-        if (analytical_solution) {
-
-            file_out_analytical.close();
-            file_out_analytical_conservative.close();
-
+        if (!file_name.empty()) {
+            file_manager.end_file();
         }
 
     }
-
-    cnt_t_pts = t_grid.size();
 
     std::cout << "END COMPUTING" << std::endl;
 
@@ -773,7 +744,8 @@ void Cabaret_scheme<LeftBT, RightBT>::compute_tau(int t_idx) {
 
         if (std::abs(conservative_u_grid[i]) > cur_c) {
 
-            throw std::runtime_error("Сверхзвуковое течение в compute tau");            
+            file_manager.end_file();    
+            throw std::runtime_error("Сверхзвуковое течение в compute tau");   
 
         }
 
@@ -948,6 +920,7 @@ std::pair<double, double> Cabaret_scheme<LeftBT, RightBT>::compute_invariant(Typ
     //Проверка на дозвуковое течение
     if (std::abs(center_conservative_u_grid[cell_idx]) > cur_c) {
 
+        file_manager.end_file();
         throw std::runtime_error("Сверхзвуковое течение в compute invariant");
 
     }
@@ -1125,10 +1098,9 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
 
 
     if (!file_name.empty()) {
-        file_out.open(file_name + "_automodel.dat");
-        file_out_conservative.open(file_name + "_automodel_conservative.dat");
-        save_layer(file_out, cnt_x_pts, 0, automodel_stream_h_grid, stream_z_grid, x_grid, automodel_stream_u_grid);
-        save_layer(file_out_conservative, cnt_x_pts - 1, 0, automodel_conservative_h_grid, conservative_z_grid, conservative_x_grid, automodel_conservative_u_grid);
+        file_manager.init_file(file_name + "_automodel.plt", 0, cnt_x_pts - 1);
+        file_manager.save_layer(t_grid[0], conservative_x_grid, automodel_conservative_h_grid, automodel_conservative_u_grid
+                              , conservative_z_grid);
     }
 
     int t_idx = 1;
@@ -1228,10 +1200,9 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
 
         }
 
-        if (!file_name.empty()) {
-
-            save_layer(file_out, cnt_x_pts, t_idx, automodel_stream_h_grid, stream_z_grid, x_grid, automodel_stream_u_grid);
-            save_layer(file_out_conservative, cnt_x_pts - 1, t_idx, automodel_conservative_h_grid, conservative_z_grid, conservative_x_grid, automodel_conservative_u_grid);
+        if (tau_grid[t_idx - 1] != 0.0 and !file_name.empty()) {
+            file_manager.save_layer(t_grid[t_idx], conservative_x_grid, automodel_conservative_h_grid, automodel_conservative_u_grid
+                                  , conservative_z_grid);
         }
 
         ++t_idx;
@@ -1239,11 +1210,7 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
     }
 
     if (!file_name.empty()) {
-
-        file_out.close();
-        file_out_conservative.close();
-
-
+        file_manager.end_file();
     }
 
 
@@ -1317,28 +1284,6 @@ template<BoundaryType LeftBT, BoundaryType RightBT>
 double Cabaret_scheme<LeftBT, RightBT>::derivative_F() {
 
     return derivative_phi_k(1) + derivative_phi_k(2);
-
-}
-
-
-template<BoundaryType LeftBT, BoundaryType RightBT>
-void Cabaret_scheme<LeftBT, RightBT>::save_layer(std::ofstream& file_out, int cnt_pts_j, int t_idx, Row& h_grid, Row& z_grid, Row& x_grid, Row& u_grid) {
-
-    if (t_idx == 0) {
-
-        file_out << "VARIABLES = \"y\", \"x\", \"h\", \"u\"" << std::endl;
-
-    }
-
-    file_out <<  "ZONE T=\"t=" << t_grid[t_idx] << "\", STRANDID=1, SOLUTIONTIME=" << t_grid[t_idx] << ", I=2" <<
-        ", J=" << cnt_pts_j << ", F=POINT" << std::endl;
-
-    for(int i = 0; i < cnt_pts_j; ++i) {
-
-        file_out << h_grid[i] + z_grid[i] << ' ' << x_grid[i]  << ' ' <<  h_grid[i] << ' ' << u_grid[i] << std::endl;
-        file_out << z_grid[i] << ' ' << x_grid[i]  << ' ' <<  h_grid[i] << ' ' << u_grid[i] << std::endl;
-
-    }
 
 }
 

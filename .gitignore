@@ -1,2 +1,7 @@
 data/*
 pngs/*
+.vscode/*
+.DS_Store
+!lib/*.o
+*.o
+main
