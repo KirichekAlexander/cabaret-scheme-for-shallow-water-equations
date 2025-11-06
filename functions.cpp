@@ -117,17 +117,55 @@ double u_0_321(double x) {
 
 
 double h_0_321(double x) {
-    return h_ex(1000.0);
+    // return h_ex(1000.0);
+    return h_ex(x);
 }
 
 
 double z_321(double x) {
-    return -h_ex(x);
+    // return -h_ex(x);
+    double h = 1.0 / 100.0;
+    if (x == 0.0) {
+        return 0.0;
+    } else {
+
+        int n = static_cast<int>(x / h);
+        if (n % 2 == 0) {
+            ++n;
+        }
+        h = x / (n - 1);
+
+        double sum = z_321_derivative(0.0) + z_321_derivative(x);
+        for(int i = 1; i < (n - 1); ++i) {
+
+            if (i % 2 == 1) {
+                sum += 4 * z_321_derivative(i * h);
+            } else {
+                sum += 2 * z_321_derivative(i * h);
+            }
+
+        }
+
+        return sum * h / 3.0;
+
+    }
+
+}
+
+double z_321_derivative(double x) {
+    return (2.25 / (g * std::pow(h_ex(x), 3.0)) - 1.0) * h_ex_derivative(x);
+    // tests:
+    // return 3 * sqr(x);
 }
 
 
 double h_ex(double x) {
-    return std::pow(4.0 / g, 1.0 / 3.0) * (1.0 + 1.0 / 2.0 * std::exp(-16 * (x / 1000.0 - 1.0 / 2.0) * (x / 1000.0 - 1.0 / 2.0)));  
+    return std::pow(4.0 / g, 1.0 / 3.0) * (1.0 + 1.0 / 2.0 * std::exp(-16 * sqr(x / 1000.0 - 1.0 / 2.0)));  
+}
+
+
+double h_ex_derivative(double x) {
+    return -std::pow(4.0 / g, 1.0 / 3.0) * 2.0 / 125.0 * (x / 1000.0 - 1.0 / 2.0) * std::exp(-16.0 * sqr(x / 1000.0 - 1.0 / 2.0));
 }
 //
 

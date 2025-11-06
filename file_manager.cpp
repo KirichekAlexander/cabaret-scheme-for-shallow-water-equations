@@ -2,7 +2,7 @@
 
 
 //Реализация файлового менеджера
-FileManager::FileManager() 
+FileManager::FileManager(int cnt_pts) 
     //Переменные для TECINI112
     : title("Shallow Water Solution")
     , variables("x y h u")
@@ -27,34 +27,39 @@ FileManager::FileManager()
     , value_location({1, 1, 1, 1})
     , share_var_from_zone({0, 0, 0, 0})
     , share_connectivity_from_zone(0)
+
+    //Переменные для TECDAT112
+    , x_values(cnt_pts, 0.0)
+    , y_values(cnt_pts, 0.0)
+    , h_values(cnt_pts, 0.0)
+    , u_values(cnt_pts, 0.0)
 {
 }
 
 
-//Инициализация файла
-void FileManager::init_file(std::string fn, INTEGER4 d, int im) {
-
-    file_name = fn;
-    debug = d;
+//Сохранение временного слоя
+void FileManager::save_layer(std::string fn, INTEGER4 d, int im, int num_layer, double t, std::vector<double>& x
+                           , std::vector<double>& h, std::vector<double>& u, std::vector<double>& z) {
     
+    //очищение файлов
+    if (num_layer == 0) {
+
+        std::filesystem::remove_all(fn);
+        std::filesystem::create_directory(fn);
+
+    }
+
     imax = im;
     num_points = 2 * imax;
-    x_values = y_values = h_values = u_values = z_values = std::vector<double>(num_points, 0.0);
-
+    debug = d;
     TECINI112(const_cast<char*>(title.c_str())
             , const_cast<char*>(variables.c_str())
-            , const_cast<char*>(file_name.c_str())
+            , const_cast<char*>((fn + "/" + std::to_string(num_layer) + ".plt").c_str())
             , const_cast<char*>(scratch_dir.c_str())
             , &file_type
             , &debug
             , &v_is_double
     );
-
-}
-
-
-//Сохранение временного слоя
-void FileManager::save_layer(double t, std::vector<double>& x, std::vector<double>& h, std::vector<double>& u, std::vector<double>& z) {
 
     solution_time = t;
     icellmax = jcellmax = kcellmax = 0;
@@ -96,10 +101,5 @@ void FileManager::save_layer(double t, std::vector<double>& x, std::vector<doubl
     TECDAT112(&num_points, h_values.data(), &v_is_double);
     TECDAT112(&num_points, u_values.data(), &v_is_double);
 
-}
-
-
-//Закрытие файла
-void FileManager::end_file() {
     TECEND112();
 }

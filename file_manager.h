@@ -3,18 +3,19 @@
 
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include <filesystem>
 #include "TECIO.h"
 #include "TECXXX.h"
 
 
 class FileManager {
 
-public:
 
-    FileManager();
-    void init_file(std::string fn, INTEGER4 d, int imax);
-    void save_layer(double t, std::vector<double>& x, std::vector<double>& h, std::vector<double>& u, std::vector<double>& z);
-    void end_file();
+public:
+    FileManager(int cnt_pts);
+    void save_layer(std::string fn, INTEGER4 d, int im, int num_layer, double t, std::vector<double>& x
+                  , std::vector<double>& h, std::vector<double>& u, std::vector<double>& z);
 
 
 

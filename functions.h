@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <utility>
+#include "read_matrix.h"
 
 
 //Ускорение свободного падения
@@ -69,7 +70,11 @@ double h_0_321(double x);
 
 double z_321(double x);
 
+double z_321_derivative(double x);
+
 double h_ex(double x);
+
+double h_ex_derivative(double x);
 
 
 //4.1.1 Dam break on a wet domain without friction
