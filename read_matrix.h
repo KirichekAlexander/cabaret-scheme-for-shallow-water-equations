@@ -140,6 +140,10 @@ void interpolate_half_sum_row(Row const&, Row&);
 double max_elem(Row const&);
 
 
+//l2 норма
+double l2_norm(Row const&);
+
+
 
 
 #endif

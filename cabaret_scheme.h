@@ -57,7 +57,7 @@ public:
 
     
     //Запуск вычислений
-    void compute();
+    double compute();
 
 
     //Обработка случаев гидродинамических прыжков
@@ -466,7 +466,7 @@ Cabaret_scheme<LeftBT, RightBT>::Cabaret_scheme(Type_grid type_grid, Boundary<Le
 }
 
 template<BoundaryType LeftBT, BoundaryType RightBT>
-void Cabaret_scheme<LeftBT, RightBT>::compute() {
+double Cabaret_scheme<LeftBT, RightBT>::compute() {
 
     //Вычисление сетки по x
     compute_x_grid();
@@ -482,6 +482,9 @@ void Cabaret_scheme<LeftBT, RightBT>::compute() {
         std::cout << err.what() << std::endl;
 
     }
+
+    double err = l2_norm(analytical_solution_conservative_h_grid - conservative_h_grid);
+    return err;
 
 }
 
@@ -654,6 +657,7 @@ void Cabaret_scheme<LeftBT, RightBT>::init_boundaries(Row& stream_u, Row& stream
 
         stream_h[0] = h_1(x_grid[0]);
         stream_u[0] = left_boundary.q / stream_h[0];
+        // stream_u[0] = 3.5 / stream_h[0];
 
     }
 
@@ -826,7 +830,7 @@ void Cabaret_scheme<LeftBT, RightBT>::compute_boundaries(int t_idx) {
         new_stream_u_grid[0] = right_invariant_and_g.first + right_invariant_and_g.second * (left_boundary.h + stream_z_grid[0]);
 
     } else if constexpr (LeftBT == BoundaryType::FLUVIAL_FLUX_GIVEN) {
-
+        // left_boundary.q = std::min({4.42, 3.5 + t_grid[t_idx] / 100.0});
         new_stream_h_grid[0] = (-(right_invariant_and_g.first + stream_z_grid[0] * right_invariant_and_g.second) 
                                 + std::sqrt(sqr(right_invariant_and_g.first + stream_z_grid[0] * right_invariant_and_g.second) 
                                 + 4 * right_invariant_and_g.second * left_boundary.q)) 

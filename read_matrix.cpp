@@ -414,3 +414,19 @@ double max_elem(Row const& row) {
     return max_num;
 
 }
+
+
+//Реализация l2 нормы
+
+double l2_norm(Row const& row) {
+
+    double sum = 0.0;
+    int sz = row.size();
+
+    for(int i = 0; i < sz; ++i) {
+        sum += sqr(row[i]);
+    }
+
+    return std::sqrt(sum);
+    
+}
