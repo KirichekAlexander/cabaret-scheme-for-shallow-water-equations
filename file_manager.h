@@ -15,7 +15,7 @@ class FileManager {
 public:
     FileManager(int cnt_pts);
     void save_layer(std::string fn, INTEGER4 d, int im, int num_layer, double t, std::vector<double>& x
-                  , std::vector<double>& h, std::vector<double>& u, std::vector<double>& z);
+                  , std::vector<double>& h, std::vector<double>& u, std::vector<double>& z, std::vector<double>* err_ptr = nullptr);
 
 
 
@@ -61,6 +61,7 @@ private:
     std::vector<double> h_values;
     std::vector<double> u_values;
     std::vector<double> z_values;
+    std::vector<double> err_values;
     INTEGER4 num_points;
 
 };

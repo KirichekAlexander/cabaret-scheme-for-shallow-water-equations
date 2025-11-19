@@ -418,15 +418,33 @@ double max_elem(Row const& row) {
 
 //Реализация l2 нормы
 
-double l2_norm(Row const& row) {
+double l2_norm(Row const& row, double h) {
 
     double sum = 0.0;
     int sz = row.size();
 
     for(int i = 0; i < sz; ++i) {
-        sum += sqr(row[i]);
+        sum += sqr(row[i]) * h;
     }
 
     return std::sqrt(sum);
     
+}
+
+
+void save_vec(std::string const& file_name, std::string const& var_name, Row const& vec, Row const& x_grid) {
+
+    std::ofstream file_out;
+    file_out.open(file_name);
+    file_out << "VARIABLES = \"x\", \"" + var_name + "\"" << std::endl;
+    int sz = vec.size();
+
+    for(int i = 0; i < sz; ++i) {
+
+        file_out << x_grid[i] << ' ' << vec[i] << std::endl;
+
+    }
+
+    file_out.close();
+
 }

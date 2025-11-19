@@ -80,6 +80,9 @@ public:
     Row& conservative_value(Type_value);
 
 
+    Row& get_conservative_x_grid();
+
+
 private:
     
     //Вычисление сетки по x
@@ -483,7 +486,11 @@ double Cabaret_scheme<LeftBT, RightBT>::compute() {
 
     }
 
-    double err = l2_norm(analytical_solution_conservative_h_grid - conservative_h_grid);
+    double err = 0.0;
+    if (analytical_solution) {
+        err = l2_norm(analytical_solution_conservative_h_grid - conservative_h_grid, (end_x_pt - start_x_pt) / (cnt_x_pts - 1));
+    }
+
     return err;
 
 }
@@ -537,9 +544,9 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
     //Начальный индекс по времени нулевой
     int t_idx = 0;
     //Сохранение начальных данных для решения схемы
-    file_manager.save_layer(file_name + "_conservative", 0, cnt_x_pts - 1, 0, t_grid[0], conservative_x_grid, conservative_h_grid
+    file_manager.save_layer(file_name + "_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, 0, t_grid[0], conservative_x_grid, conservative_h_grid
                           , conservative_u_grid, conservative_z_grid);
-    file_manager.save_layer(file_name + "_stream", 0, cnt_x_pts, 0, t_grid[0], x_grid, stream_h_grid
+    file_manager.save_layer(file_name + "_stream/" + std::to_string(cnt_x_pts), 0, cnt_x_pts, 0, t_grid[0], x_grid, stream_h_grid
                           , stream_u_grid, stream_z_grid);
 
     if (analytical_solution) {
@@ -549,10 +556,10 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
         analytical_solution_stream_h_grid = stream_h_grid;
         analytical_solution_stream_u_grid = stream_u_grid;
         //сохранение начальных данных для аналитического решения
-        file_manager.save_layer(file_name + "_analytical_conservative", 0, cnt_x_pts - 1, 0, t_grid[0], conservative_x_grid
+        file_manager.save_layer(file_name + "_analytical_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, 0, t_grid[0], conservative_x_grid
                               , analytical_solution_conservative_h_grid, analytical_solution_conservative_u_grid
                               , conservative_z_grid);
-        file_manager.save_layer(file_name + "_analytical_stream", 0, cnt_x_pts, 0, t_grid[0], x_grid
+        file_manager.save_layer(file_name + "_analytical_stream/" + std::to_string(cnt_x_pts), 0, cnt_x_pts, 0, t_grid[0], x_grid
                               , analytical_solution_stream_h_grid, analytical_solution_stream_u_grid, stream_z_grid);
 
     }
@@ -580,13 +587,6 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
 
             if (tau_grid[t_idx - 1] != 0.0) {
 
-                std::cout << "TIME LAYER: " << t_grid[t_idx] << std::endl;
-                //Сохранение решения схемы
-                file_manager.save_layer(file_name + "_conservative", 0, cnt_x_pts - 1, t_idx, t_grid[t_idx]
-                                      , conservative_x_grid, conservative_h_grid, conservative_u_grid, conservative_z_grid);
-                file_manager.save_layer(file_name + "_stream", 0, cnt_x_pts, t_idx, t_grid[t_idx], x_grid, stream_h_grid
-                                    , stream_u_grid, stream_z_grid);
-
                 //Вычисление аналитического решения
                 if (analytical_solution) {
 
@@ -605,13 +605,21 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
                     analytical_solution_stream_h_grid[cnt_x_pts - 1] = analytical_solution_values.first;
                     analytical_solution_stream_u_grid[cnt_x_pts - 1] = analytical_solution_values.second;
                     //Сохранение аналитического решения
-                    file_manager.save_layer(file_name + "_analytical_conservative", 0, cnt_x_pts - 1, t_idx, t_grid[t_idx]
+                    file_manager.save_layer(file_name + "_analytical_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, t_idx, t_grid[t_idx]
                                           , conservative_x_grid, analytical_solution_conservative_h_grid
                                           , analytical_solution_conservative_u_grid, conservative_z_grid);
-                    file_manager.save_layer(file_name + "_analytical_stream", 0, cnt_x_pts, t_idx, t_grid[t_idx], x_grid
+                    file_manager.save_layer(file_name + "_analytical_stream/" + std::to_string(cnt_x_pts), 0, cnt_x_pts, t_idx, t_grid[t_idx], x_grid
                               , analytical_solution_stream_h_grid, analytical_solution_stream_u_grid, stream_z_grid);
 
                 }
+
+                Row err = (analytical_solution ? analytical_solution_conservative_h_grid - conservative_h_grid : Row(0));
+                std::cout << "TIME LAYER: " << t_grid[t_idx] << std::endl;
+                //Сохранение решения схемы
+                file_manager.save_layer(file_name + "_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, t_idx, t_grid[t_idx]
+                                      , conservative_x_grid, conservative_h_grid, conservative_u_grid, conservative_z_grid, (analytical_solution ? &err : nullptr));
+                file_manager.save_layer(file_name + "_stream/" + std::to_string(cnt_x_pts), 0, cnt_x_pts, t_idx, t_grid[t_idx], x_grid, stream_h_grid
+                                    , stream_u_grid, stream_z_grid);
 
                 it_to_skip_layer = 0;
 
@@ -1096,9 +1104,9 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
 
 
     //сохранение начальных данных для автомодельного решения
-    file_manager.save_layer(file_name + "_automodel_conservative", 0, cnt_x_pts - 1, 0, t_grid[0], conservative_x_grid
+    file_manager.save_layer(file_name + "_automodel_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, 0, t_grid[0], conservative_x_grid
                           , automodel_conservative_h_grid, automodel_conservative_u_grid, conservative_z_grid);
-    file_manager.save_layer(file_name + "_automodel_stream", 0, cnt_x_pts, 0, t_grid[0], x_grid
+    file_manager.save_layer(file_name + "_automodel_stream/" + std::to_string(cnt_x_pts), 0, cnt_x_pts, 0, t_grid[0], x_grid
                           , automodel_stream_h_grid, automodel_stream_u_grid, stream_z_grid);
 
     int t_idx = 1;
@@ -1200,9 +1208,9 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
 
 
         if (tau_grid[t_idx - 1] != 0.0 ) {
-            file_manager.save_layer(file_name + "_automodel_conservative", 0, cnt_x_pts - 1, t_idx, t_grid[t_idx], conservative_x_grid
+            file_manager.save_layer(file_name + "_automodel_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, t_idx, t_grid[t_idx], conservative_x_grid
                                   , automodel_conservative_h_grid, automodel_conservative_u_grid, conservative_z_grid);
-            file_manager.save_layer(file_name + "_automodel_stream", 0, cnt_x_pts, t_idx, t_grid[t_idx], x_grid
+            file_manager.save_layer(file_name + "_automodel_stream/" + std::to_string(cnt_x_pts), 0, cnt_x_pts, t_idx, t_grid[t_idx], x_grid
                                   , automodel_stream_h_grid, automodel_stream_u_grid, stream_z_grid);
         }
 
@@ -1215,7 +1223,7 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
 
     double err = 0.0;
     Row err_vec = conservative_h_grid - automodel_conservative_h_grid;
-    save_error(file_name + "_err.dat", cnt_x_pts - 1, err_vec, conservative_x_grid);
+    // save_error(file_name + "_err.dat", cnt_x_pts - 1, err_vec, conservative_x_grid);
     int sz = err_vec.size();
     // std::cout << "sz=" << sz << std::endl;
     for(int i = 0; i < sz; ++i) {
@@ -1333,6 +1341,12 @@ Row& Cabaret_scheme<LeftBT, RightBT>::conservative_value(Type_value _type_conser
 
     }
 
+}
+
+
+template<BoundaryType LeftBT, BoundaryType RightBT>
+Row& Cabaret_scheme<LeftBT, RightBT>::get_conservative_x_grid() {
+    return conservative_x_grid;
 }
 
 

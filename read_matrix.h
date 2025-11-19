@@ -141,8 +141,11 @@ double max_elem(Row const&);
 
 
 //l2 норма
-double l2_norm(Row const&);
+double l2_norm(Row const&, double h);
 
+
+//Построить график функции на сетке x_grid
+void save_vec(std::string const& file_name, std::string const& var_name, Row const& vec, Row const& x_grid);
 
 
 

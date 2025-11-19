@@ -5,7 +5,7 @@
 FileManager::FileManager(int cnt_pts) 
     //Переменные для TECINI112
     : title("Shallow Water Solution")
-    , variables("x y h u")
+    , variables("x y h u err")
     , scratch_dir(".")
     , file_type(0)
     , v_is_double(1)
@@ -24,8 +24,8 @@ FileManager::FileManager(int cnt_pts)
     , num_connected_boundary_faces(0)
     , total_num_boundary_connections(0)
     , passive_var_list(nullptr)
-    , value_location({1, 1, 1, 1})
-    , share_var_from_zone({0, 0, 0, 0})
+    , value_location({1, 1, 1, 1, 1})
+    , share_var_from_zone({0, 0, 0, 0, 0})
     , share_connectivity_from_zone(0)
 
     //Переменные для TECDAT112
@@ -33,19 +33,20 @@ FileManager::FileManager(int cnt_pts)
     , y_values(cnt_pts, 0.0)
     , h_values(cnt_pts, 0.0)
     , u_values(cnt_pts, 0.0)
+    , err_values(cnt_pts, 0.0)
 {
 }
 
 
 //Сохранение временного слоя
 void FileManager::save_layer(std::string fn, INTEGER4 d, int im, int num_layer, double t, std::vector<double>& x
-                           , std::vector<double>& h, std::vector<double>& u, std::vector<double>& z) {
+                           , std::vector<double>& h, std::vector<double>& u, std::vector<double>& z, std::vector<double>* err_ptr) {
     
     //очищение файлов
     if (num_layer == 0) {
 
         std::filesystem::remove_all(fn);
-        std::filesystem::create_directory(fn);
+        std::filesystem::create_directories(fn);
 
     }
 
@@ -53,7 +54,7 @@ void FileManager::save_layer(std::string fn, INTEGER4 d, int im, int num_layer, 
     num_points = 2 * imax;
     debug = d;
     TECINI112(const_cast<char*>(title.c_str())
-            , const_cast<char*>(variables.c_str())
+            , const_cast<char*>((variables).c_str())
             , const_cast<char*>((fn + "/" + std::to_string(num_layer) + ".plt").c_str())
             , const_cast<char*>(scratch_dir.c_str())
             , &file_type
@@ -96,10 +97,19 @@ void FileManager::save_layer(std::string fn, INTEGER4 d, int im, int num_layer, 
         
     }
 
+    if (err_ptr) {
+        
+        for(int i = 0; i < imax; ++i) {
+            err_values[i] = err_values[i + imax] = (*err_ptr)[i];
+        }
+
+    }
+
     TECDAT112(&num_points, x_values.data(), &v_is_double);
     TECDAT112(&num_points, y_values.data(), &v_is_double);
     TECDAT112(&num_points, h_values.data(), &v_is_double);
     TECDAT112(&num_points, u_values.data(), &v_is_double);
+    TECDAT112(&num_points, err_values.data(), &v_is_double);
 
     TECEND112();
 }
