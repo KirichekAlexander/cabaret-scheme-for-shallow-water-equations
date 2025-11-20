@@ -32,6 +32,49 @@ struct Point3 {
 };
 
 
+struct Vec3 {
+    double a = 0.0;
+    double b = 0.0;
+    double c = 0.0;
+
+    Vec3 operator+(Vec3 const& other) const;
+    Vec3 operator*(double k) const;
+    Vec3 operator-(Vec3 const& other) const;
+    Vec3 operator/(double k) const;
+};
+
+//Реализация оператор для Vec3
+Vec3 Vec3::operator+(Vec3 const& other) const {
+    return Vec3{a + other.a,
+                b + other.b, 
+                c + other.c};
+}
+
+
+Vec3 Vec3::operator*(double k) const {
+    return Vec3{a * k,
+                b * k, 
+                c * k};
+}
+
+Vec3 Vec3::operator-(Vec3 const& other) const {
+    return Vec3{a - other.a,
+                b - other.b,
+                c - other.c};
+}
+
+Vec3 Vec3::operator/(double k) const {
+      return Vec3{a / k,
+                  b / k, 
+                  c / k};
+}
+
+
+Vec3 operator*(double k, Vec3 const& vec) {
+    return vec * k;
+}
+
+
 // Синонимы для массивов точек (u, v, h)
 using Field1D = std::vector<Point3>;
 using Field2D = std::vector<std::vector<Point3>>;
@@ -39,12 +82,20 @@ using Field2D = std::vector<std::vector<Point3>>;
 
 //Структура для просмотра ячейки
 struct CellView {
-    Point3 &L;
-    Point3 &R;
-    Point3 &T;
-    Point3 &B;
-    Point3 &c;
+    Point3& L;
+    Point3& R;
+    Point3& T;
+    Point3& B;
+    Point3& c;
+    double& zL;
+    double& zR;
+    double& zT;
+    double& zB;
+    double& zc;
 };
+
+
+
 
 
 
@@ -64,20 +115,28 @@ public:
                              Func2D u0, Func2D v0,
                              Func2D h0, Func2D z0);
 
-    //метод вычисления
-    void compute();
+    void compute(); // метод вычисления
 
 
 private:
-    //метод строит пространтсвенную сетку
+    // метод строит пространтсвенную сетку
     void build_grid(Row& grid_center, Row& grid_face,
                     int n, double delta,
                     double l1);
     
-    //метод инициализации данных
-    void init_data();
+    void init_data(); // метод инициализации данных
 
-    double compute_time_step();
+    CellView get_cell(int i, int j); // просмотр ячейки по индексам
+
+    double compute_time_step(); // вычисление временного шага
+
+    Vec3 make_U(Point3 const& p);
+    Vec3 make_G(Point3 const& p, double z);
+    Vec3 make_H(Point3 const& p, double z);
+    Point3 make_Point3_from_U(Vec3 const& U);
+    void first_phase(); // первая фаза
+    void second_phase(); // вторая фаза
+    void third_phase(); // третья фаза
 
     double CFL;
 
@@ -117,6 +176,7 @@ private:
     Matrix z_face_y; // z на горизонтальных гранях
 
     Field2D center; // (u, v, h) в центрах
+    Field2D half_step_center; // (u, v, h) в промежуточном временном слою в центрах ячеек
     Field2D face_x; // (u, v, h) на вертикальных гранях
     Field2D face_y; // (u, v, h) на горизонтальных гранях
 };
@@ -153,6 +213,7 @@ CabaretScheme2D::CabaretScheme2D(double CFL,
     , z_face_x(nx + 1, ny)
     , z_face_y(nx, ny + 1)
     , center(nx, Field1D(ny))
+    , half_step_center(nx, Field1D(ny))
     , face_x(nx + 1, Field1D(ny))
     , face_y(nx, Field1D(ny + 1))
 {
@@ -228,10 +289,129 @@ void CabaretScheme2D::init_data() {
 }
 
 
+CellView CabaretScheme2D::get_cell(int i, int j) {
+    return CellView{face_x[i][j],
+                    face_x[i + 1][j],
+                    face_y[i][j + 1],
+                    face_y[i][j],
+                    center[i][j],
+                    z_face_x[i][j],
+                    z_face_x[i + 1][j],
+                    z_face_y[i][j + 1],
+                    z_face_y[i][j],
+                    z_center[i][j]};
+}
+
+
 void CabaretScheme2D::compute() {
 
+    while(t != T) {
+
+        dt = compute_time_step();
+
+        first_phase();
+        second_phase();
+        third_phase();
 
 
+    }
+
+}
+
+
+double CabaretScheme2D::compute_time_step() {
+
+    //Изначально шаг - максимальное число double
+    double res = std::numeric_limits<double>::max();
+
+    //Проход по всем центрам ячеек
+    for(int i = 0; i < nx; ++i) {
+        for(int j = 0; j < ny; ++j) {
+
+            Point3 const& c = center[i][j];
+            res = std::min({res, CFL * dx / (std::abs(c.u) + std::sqrt(g * c.h)),
+                            CFL * dy / (std::abs(c.v) + std::sqrt(g * c.h))});
+
+        }
+    }
+
+    return res;
+
+}
+
+
+Vec3 CabaretScheme2D::make_U(Point3 const& p) {
+    return Vec3{p.h,        // h
+                p.h * p.u,  // hu
+                p.h * p.v}; // hv
+}
+
+
+Vec3 CabaretScheme2D::make_G(Point3 const& p, double z) {
+    return Vec3{p.h * p.u,                                                     // hu
+                p.h * sqr(p.u) + g * (sqr(p.h + z) - 2 * z * (p.h + z)) * 0.5, // hu^2 + g(H^2 - 2zH) / 2
+                p.h * p.v * p.u};                                              // hvu
+}
+
+
+Vec3 CabaretScheme2D::make_H(Point3 const& p, double z) {
+    return Vec3{p.h * p.v,                                                      // hv
+                p.h * p.v * p.u,                                                // hvu
+                p.h * sqr(p.v) + g * (sqr(p.h + z) - 2 * z * (p.h + z)) * 0.5}; // hv^2 + g(H^2 - 2zH) / 2
+}
+
+
+Point3 CabaretScheme2D::make_Point3_from_U(Vec3 const& U) {
+    return Point3{U.b / U.a, // u
+                  U.c / U.a, // v
+                  U.a};      // h
+}
+
+
+void CabaretScheme2D::first_phase() {
+
+    //Проход по всем ячейкам
+    for(int i = 0 ; i < nx; ++i) {
+        for (int j = 0; j < ny; ++j) {
+
+            //Решаем первую фазу в векторном виде
+            CellView cell = get_cell(i, j);
+            Point3& half_step_c = half_step_center[i][j];
+            Vec3 U_c = make_U(cell.c);
+            Vec3 G_R = make_G(cell.R, cell.zR);
+            Vec3 G_L = make_G(cell.L, cell.zL);
+            Vec3 H_T = make_H(cell.T, cell.zT);
+            Vec3 H_B = make_H(cell.B, cell.zB);
+            Vec3 U_half_step_c = U_c + 0.5 * dt * ((G_L - G_R) / dx + (H_B - H_T) / dy);
+            half_step_c = make_Point3_from_U(U_half_step_c);
+            //
+            
+        }
+    }
+
+}
+
+
+void CabaretScheme2D::third_phase() {
+
+    //Проход по всем ячейкам
+    for(int i = 0 ; i < nx; ++i) {
+        for (int j = 0; j < ny; ++j) {
+
+            //Решаем третью фазу в векторном виде
+            CellView cell = get_cell(i, j);
+            Point3& half_step_c = half_step_center[i][j];
+            Vec3 U_half_step_c = make_U(half_step_c);
+            Vec3 G_R = make_G(cell.R, cell.zR);
+            Vec3 G_L = make_G(cell.L, cell.zL);
+            Vec3 H_T = make_H(cell.T, cell.zT);
+            Vec3 H_B = make_H(cell.B, cell.zB);
+            Vec3 U_c = U_half_step_c + 0.5 * dt * ((G_L - G_R) / dx + (H_B - H_T) / dy);
+            cell.c = make_Point3_from_U(U_c);
+            //
+            
+        }
+    }
 }
 
 
