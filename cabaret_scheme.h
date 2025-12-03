@@ -1221,26 +1221,9 @@ double Cabaret_scheme<LeftBT, RightBT>::automodeling_solution(double start_cmp_s
     std::cout << "END COMPUTING" << std::endl;
 
 
-    double err = 0.0;
     Row err_vec = conservative_h_grid - automodel_conservative_h_grid;
-    // save_error(file_name + "_err.dat", cnt_x_pts - 1, err_vec, conservative_x_grid);
-    int sz = err_vec.size();
-    // std::cout << "sz=" << sz << std::endl;
-    for(int i = 0; i < sz; ++i) {
-
-        if ((x_grid[i] + h_grid[i] / 2.0) > start_cmp_seg and (x_grid[i] + h_grid[i] / 2.0) < end_cmp_seg) {
-
-            if (std::abs(err_vec[i]) > err) {
-
-                err = std::abs(err_vec[i]);
-
-            }
-
-        }
-        // std::cout << "("<< err_vec[i] << ", " << x_grid[i] + h_grid[i] / 2.0 << ")," << std::endl; 
-
-    }
-    std::cout << cnt_x_pts << " " << err << std::endl;
+    save_vec(file_name + "_conservative/err_automodel_" + std::to_string(cnt_x_pts - 1) + ".dat", "err", err_vec, conservative_x_grid);
+    double err = l2_norm(err_vec, (end_x_pt - start_x_pt) / (cnt_x_pts - 1));
     return err;
 
 }
