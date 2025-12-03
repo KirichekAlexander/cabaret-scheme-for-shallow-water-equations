@@ -218,5 +218,42 @@ double x_c(double t) {
 //
 
 
+// тесты 2D
+
+//well-balanced
+double z2D_1(double x, double y) {
+    return 0.0;
+}
+
+
+double u02D_1(double x, double y) {
+    return 0.0;
+}
+
+
+double v02D_1(double x, double y) {
+    return 0.0;
+}
+
+
+double h02D_1(double x, double y) {
+    return 1.0 - z2Dfear(x, y);
+}
+
+double z2Dfear(double x, double y) {
+    double s =
+        std::sin(35.0*x) +
+        0.9*std::sin(33.0*y) +
+        0.7*std::sin(29.0*(x+y)) +
+        0.6*std::sin(41.0*(x-0.3*y)) +
+        0.5*std::sin(37.0*(0.7*x+1.1*y));
+
+    // нормировка "примерно" в [-1,1]
+    s /= (1.0 + 0.9 + 0.7 + 0.6 + 0.5);
+    s = std::clamp(s, -1.0, 1.0);
+    return 0.3 * s; // ~[-0.3, 0.3]
+}
+
+
 
 #pragma GCC diagnostic pop

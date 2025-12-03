@@ -7,6 +7,7 @@
 #include <filesystem>
 #include "TECIO.h"
 #include "TECXXX.h"
+#include "aux_module.h"
 
 
 class FileManager {
@@ -63,6 +64,69 @@ private:
     std::vector<double> z_values;
     INTEGER4 num_points;
 
+};
+
+
+
+class FileManager2D {
+public:
+    FileManager2D(int nx, int ny);
+
+
+    void save_layer(const std::string& folder,
+                    INTEGER4 debug,
+                    int layer,
+                    double t,
+                    Row const& x_center,
+                    Row const& y_center,
+                    Matrix const& z_center,
+                    Field2D const& center);
+
+private:
+    int nx;
+    int ny;
+
+    // TECINI112
+    std::string title;
+    std::string variables;
+    std::string scratch_dir;
+    INTEGER4 file_type;
+    INTEGER4 v_is_double;
+
+    // TECZNE112
+    std::string zone_title_prefix;
+    INTEGER4 zone_type;
+    INTEGER4 imax;
+    INTEGER4 jmax;
+    INTEGER4 kmax;
+
+    INTEGER4 icellmax;
+    INTEGER4 jcellmax;
+    INTEGER4 kcellmax;
+
+    double solution_time;
+    INTEGER4 strand_id;
+    INTEGER4 parent_zone;
+    INTEGER4 is_block;
+    INTEGER4 num_face_connections;
+    INTEGER4 face_neighbor_mode;
+    INTEGER4 total_num_face_nodes;
+    INTEGER4 num_connected_boundary_faces;
+    INTEGER4 total_num_boundary_connections;
+    INTEGER4* passive_var_list;
+    std::vector<INTEGER4> value_location;
+    std::vector<INTEGER4> share_var_from_zone;
+    INTEGER4 share_connectivity_from_zone;
+
+    // TECDAT112 buffers
+    INTEGER4 num_points;
+    std::vector<double> x_values;
+    std::vector<double> y_values;
+    std::vector<double> z_values;
+    std::vector<double> H_values;
+    std::vector<double> h_values;
+    std::vector<double> u_values;
+    std::vector<double> v_values;
 };
 
 

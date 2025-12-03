@@ -94,4 +94,18 @@ double x_b(double t);
 double x_c(double t);
 
 
+// тесты 2D
+
+//well-balanced
+double z2D_1(double x, double y);
+
+double u02D_1(double x, double y);
+
+double v02D_1(double x, double y);
+
+double h02D_1(double x, double y);
+
+double z2Dfear(double x, double y);
+
+
 #endif

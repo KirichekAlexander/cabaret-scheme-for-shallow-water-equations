@@ -9,128 +9,6 @@
 #include "file_manager.h"
 
 
-//Синоним для функции двух переменных
-using Func2D = double (*)(double, double);
-
-enum class Side {LEFT, RIGHT, TOP, BOTTOM};
-
-/*
-Структура ячейки
- ----T----
-|         |
-|         |
-L    c    R
-|         |
-|         |
- ----B----
-*/
-
-//Точка из 3 величин
-struct Point3 {
-    double u = 0.0;
-    double v = 0.0;
-    double h = 0.0;
-};
-
-
-struct Vec3 {
-    double a = 0.0;
-    double b = 0.0;
-    double c = 0.0;
-
-    Vec3 operator+(Vec3 const& other) const;
-    Vec3 operator*(double k) const;
-    Vec3 operator-(Vec3 const& other) const;
-    Vec3 operator/(double k) const;
-    Vec3 operator*(Vec3 const& other) const;
-    Vec3 operator<(Vec3 const& other) const;
-};
-
-//Реализация оператор для Vec3
-Vec3 Vec3::operator+(Vec3 const& other) const {
-    return Vec3{a + other.a,
-                b + other.b, 
-                c + other.c};
-}
-
-
-Vec3 Vec3::operator*(double k) const {
-    return Vec3{a * k,
-                b * k, 
-                c * k};
-}
-
-Vec3 Vec3::operator-(Vec3 const& other) const {
-    return Vec3{a - other.a,
-                b - other.b,
-                c - other.c};
-}
-
-Vec3 Vec3::operator/(double k) const {
-      return Vec3{a / k,
-                  b / k, 
-                  c / k};
-}
-
-
-Vec3 Vec3::operator*(Vec3 const& other) const {
-    return Vec3{a * other.a,
-                b * other.b,
-                c * other.c};
-}
-
-
-Vec3 operator*(double k, Vec3 const& vec) {
-    return vec * k;
-}
-
-
-Vec3 min_invariants(std::initializer_list<Vec3> list) {
-    std::initializer_list<Vec3>::iterator it = list.begin();
-    Vec3 res = *it++;
-    for (; it != list.end(); ++it) {
-        res.a = std::min(res.a, it->a);
-        res.b = std::min(res.b, it->b);
-        res.c = std::min(res.c, it->c);
-    }
-    return res;
-}
-
-Vec3 max_invariants(std::initializer_list<Vec3> list) {
-    std::initializer_list<Vec3>::iterator it = list.begin();
-    Vec3 res = *it++;
-    for (; it != list.end(); ++it) {
-        res.a = std::max(res.a, it->a);
-        res.b = std::max(res.b, it->b);
-        res.c = std::max(res.c, it->c);
-    }
-    return res;
-}
-
-
-// Синонимы для массивов точек (u, v, h)
-using Field1D = std::vector<Point3>;
-using Field2D = std::vector<std::vector<Point3>>;
-
-
-//Структура для просмотра ячейки
-struct CellView {
-    Point3& L;
-    Point3& R;
-    Point3& T;
-    Point3& B;
-    Point3& c;
-    double& zL;
-    double& zR;
-    double& zT;
-    double& zB;
-    double& zc;
-};
-
-
-
-
-
 
 /*
 *Схема КАБАРЕ для уравнений мелкой воды в двумерном случае
@@ -146,7 +24,8 @@ public:
                              double l1y, double l2y,
                              double T,
                              Func2D u0, Func2D v0,
-                             Func2D h0, Func2D z0);
+                             Func2D h0, Func2D z0,
+                             std::string const& file_name);
 
     void compute(); // метод вычисления
 
@@ -158,6 +37,12 @@ private:
                     double l1);
     
     void init_data(); // метод инициализации данных
+    // заполнение выбранных полей
+    void init_fields(int i1, int i2,
+                     int j1, int j2,
+                     Matrix& z, Field2D& points,
+                     Row const& x, Row const& y);
+    void init_boundaries(Side side); // инициализация границ 
 
     // создать ячейку по заданным массивам
     CellView make_cell(Field2D& center_field,
@@ -173,20 +58,25 @@ private:
 
     double compute_time_step(); // вычисление временного шага
 
-    Vec3 make_U(Point3 const& p);
-    Vec3 make_G(Point3 const& p, double z);
-    Vec3 make_H(Point3 const& p, double z);
-    Point3 make_Point3_from_U(Vec3 const& U);
+    Vec3<double> make_U(Point3 const& p);
+    Vec3<double> make_G(Point3 const& p, double z, double hL, double hR);
+    Vec3<double> make_H(Point3 const& p, double z, double hT, double hB);
+    Point3 make_Point3_from_U(Vec3<double> const& U);
     void first_phase(); // первая фаза
+
+    // функции второй фазы
     void second_phase(); // вторая фаза
-    Point3 make_Point3_from_invariants_x(Vec3 const& I);
-    Point3 make_Point3_from_invariants_y(Vec3 const& I);
-    Vec3 choose_invariants(Vec3 const& char_speeds_sum, Vec3 const& I_minus, Vec3 const& I_plus);
-    Vec3 compute_invariants(int i, int j, Side side); // вычисление инвариантов
-    Vec3 make_invariants_x(Point3 const& p, double b_0, double b_q); // вычисление инвариантов вдоль оси x
-    Vec3 make_invariants_y(Point3 const& p, double b_0, double b_q); // вычисление инвариантов вдоль оси y
-    Vec3 make_char_speeds_x(Point3 const& p); // вычисление хар-их скоростей вдоль оси x
-    Vec3 make_char_speeds_y(Point3 const& p); // вычисление хар-их скоростей вдоль оси x
+    void compute_boundaries(Side side); // вычисление границ
+    Point3 make_Point3_from_invariants_x(Vec3<Vec2> const& I, double z);
+    Point3 make_Point3_from_invariants_y(Vec3<Vec2> const& I, double z);
+    Vec3<Vec2> choose_invariants(Vec3<double> const& char_speeds_sum, Vec3<Vec2> const& I_minus, Vec3<Vec2> const& I_plus);
+    Vec3<Vec2> compute_invariants(int i, int j, Side side); // вычисление инвариантов
+    Vec3<Vec2> make_invariants_x(Point3 const& p, double z, double h_half_step); // вычисление инвариантов вдоль оси x
+    Vec3<Vec2> make_invariants_y(Point3 const& p, double z, double h_half_step); // вычисление инвариантов вдоль оси y
+    Vec3<double> make_char_speeds_x(Point3 const& p); // вычисление хар-их скоростей вдоль оси x
+    Vec3<double> make_char_speeds_y(Point3 const& p); // вычисление хар-их скоростей вдоль оси y
+    //
+
     void third_phase(); // третья фаза
 
     double CFL;
@@ -233,6 +123,11 @@ private:
     Field2D next_face_x; // (u, v, h) на вертикальных гранях на новом временном слою
     Field2D next_face_y; // (u, v, h) на горизонтальных гранях на новом временном слою
 
+
+    std::string file_name;
+    FileManager2D file_manager;
+    int num_layer;
+
 };
 
 
@@ -243,7 +138,8 @@ CabaretScheme2D::CabaretScheme2D(double CFL,
                                  double l1y, double l2y,
                                  double T,
                                  Func2D u0, Func2D v0,
-                                 Func2D h0, Func2D z0) 
+                                 Func2D h0, Func2D z0,
+                                 std::string const& file_name) 
     : CFL(CFL)
     , nx(nx)
     , ny(ny)
@@ -272,10 +168,14 @@ CabaretScheme2D::CabaretScheme2D(double CFL,
     , face_y(nx, Field1D(ny + 1))
     , next_face_x(nx + 1, Field1D(ny))
     , next_face_y(nx, Field1D(ny + 1))
+    , file_name(file_name)
+    , file_manager(nx, ny)
+    , num_layer(0)
 {
     build_grid(x_center, x_face_x, nx, dx, l1x); // вычисление точек по x
     build_grid(y_center, y_face_y, ny, dy, l1y); // вычисление точек по y
     init_data(); // инциализация по начальным данным
+    file_manager.save_layer(file_name, 0, num_layer, t, x_center, y_center, z_center, center);
 }
 
 
@@ -294,52 +194,101 @@ void CabaretScheme2D::build_grid(Row& grid_center, Row& grid_face,
 
 void CabaretScheme2D::init_data() {
 
-    for(int i = 0; i < nx; ++i) {
-        for(int j = 0; j < ny; ++j) {
+    //Инициализация внутренних точек
+    init_fields(0, nx, 0, ny, z_center, center, x_center, y_center); // инициализация центральных точек
+    init_fields(1, nx, 0, ny, z_face_x, face_x, x_face_x, y_center); // инициализация вертикальных граней
+    init_fields(0, nx, 1, ny, z_face_y, face_y, x_center, y_face_y); // инициализация горизонтальных граней
+    //
 
-            z_center[i][j] = z0(x_center[i], y_center[j]);
-            z_face_x[i][j] = z0(x_face_x[i], y_center[j]);
-            z_face_y[i][j] = z0(x_center[i], y_face_y[j]);
 
-            center[i][j].u = u0(x_center[i], y_center[j]);
-            face_x[i][j].u = u0(x_face_x[i], y_center[j]);
-            face_y[i][j].u = u0(x_center[i], y_face_y[j]);
+    // инициализация границ (приоритет к граничным данным)
+    init_boundaries(Side::LEFT);
+    init_boundaries(Side::RIGHT);
+    init_boundaries(Side::TOP);
+    init_boundaries(Side::BOTTOM);
 
-            center[i][j].v = v0(x_center[i], y_center[j]);
-            face_x[i][j].v = v0(x_face_x[i], y_center[j]);
-            face_y[i][j].v = v0(x_center[i], y_face_y[j]);
+}
 
-            center[i][j].h = h0(x_center[i], y_center[j]);
-            face_x[i][j].h = h0(x_face_x[i], y_center[j]);
-            face_y[i][j].h = h0(x_center[i], y_face_y[j]);
 
+void CabaretScheme2D::init_fields(int i1, int i2,
+                                  int j1, int j2,
+                                  Matrix& z, Field2D& points,
+                                  Row const& x, Row const& y) {
+
+    for(int i = i1; i < i2; ++i) {
+        for(int j = j1; j < j2; ++j) {
+            z[i][j] = z0(x[i], y[j]);
+            points[i][j].u = u0(x[i], y[j]);
+            points[i][j].v = v0(x[i], y[j]);
+            points[i][j].h = h0(x[i], y[j]);
         }
     }
 
-    //заполняю крайнюю верхнюю гортзонтальную грань
-    for(int i = 0; i < nx; ++i) {
+}
+
+
+void CabaretScheme2D::init_boundaries(Side side) {
+
+    //пока что реализация только граничных условий непротекания
+    switch (side)
+    {
+
+    case Side::LEFT: // крайняя левая вертикальная грань
+
+        for(int j = 0; j < ny; ++j) {
+
+            z_face_x[0][j] = z0(x_face_x[0], y_center[j]);
+            
+            face_x[0][j].u = 0.0;
+            face_x[0][j].v = v0(x_face_x[0], y_center[j]);
+            face_x[0][j].h = h0(x_face_x[0], y_center[j]);
+
+        }    
+
+        break;
+    
+    case Side::RIGHT: // карйняя правая вертикальная грань
+
+        for(int j = 0; j < ny; ++j) {
+
+            z_face_x[nx][j] = z0(x_face_x[nx], y_center[j]);
+            
+            face_x[nx][j].u = 0.0;
+            face_x[nx][j].v = v0(x_face_x[nx], y_center[j]);
+            face_x[nx][j].h = h0(x_face_x[nx], y_center[j]);
+
+        }    
+
+        break;
+
+    case Side::TOP: // крайняя верхняя горизонтальная грань
+
+        for(int i = 0; i < nx; ++i) {
 
             z_face_y[i][ny] = z0(x_center[i], y_face_y[ny]);
-
+            
             face_y[i][ny].u = u0(x_center[i], y_face_y[ny]);
-
-            face_y[i][ny].v = v0(x_center[i], y_face_y[ny]);
-
+            face_y[i][ny].v = 0.0;
             face_y[i][ny].h = h0(x_center[i], y_face_y[ny]);
 
-    }
+        }    
 
-    //заполняю крайнюю правую вертикальную грань
-    for(int i = 0; i < ny; ++i) {
+        break;
 
-            z_face_x[nx][i] = z0(x_face_x[nx], y_center[i]);
+    case Side::BOTTOM: // крайняя нижняя грань
 
-            face_x[nx][i].u = u0(x_face_x[nx], y_center[i]);
+    for(int i = 0; i < nx; ++i) {
 
-            face_x[nx][i].v = v0(x_face_x[nx], y_center[i]);
-
-            face_x[nx][i].h = h0(x_face_x[nx], y_center[i]);
+            z_face_y[i][0] = z0(x_center[i], y_face_y[0]);
             
+            face_y[i][0].u = u0(x_center[i], y_face_y[0]);
+            face_y[i][0].v = 0.0;
+            face_y[i][0].h = h0(x_center[i], y_face_y[0]);
+
+        }    
+
+        break;
+
     }
 
 }
@@ -378,13 +327,19 @@ CellView CabaretScheme2D::get_next_cell(int i, int j) {
 
 void CabaretScheme2D::compute() {
 
-    while(t != T) {
+    while(t < T) {
 
         dt = compute_time_step();
 
         first_phase();
         second_phase();
         third_phase();
+
+        ++num_layer;
+        std::cout << "t: " << t << " layer: " << num_layer << std::endl;
+        t += dt;
+
+        file_manager.save_layer(file_name, 0, num_layer, t, x_center, y_center, z_center, center);
 
 
     }
@@ -413,28 +368,28 @@ double CabaretScheme2D::compute_time_step() {
 }
 
 
-Vec3 CabaretScheme2D::make_U(Point3 const& p) {
-    return Vec3{p.h,        // h
+Vec3<double> CabaretScheme2D::make_U(Point3 const& p) {
+    return Vec3<double>{p.h,        // h
                 p.h * p.u,  // hu
                 p.h * p.v}; // hv
 }
 
 
-Vec3 CabaretScheme2D::make_G(Point3 const& p, double z) {
-    return Vec3{p.h * p.u,                                                     // hu
-                p.h * sqr(p.u) + g * (sqr(p.h + z) - 2 * z * (p.h + z)) * 0.5, // hu^2 + g(H^2 - 2zH) / 2
+Vec3<double> CabaretScheme2D::make_G(Point3 const& p, double z, double hL, double hR) {
+    return Vec3<double>{p.h * p.u,                                                     // hu
+                p.h * sqr(p.u) + 0.5 * g * (hL + hR) * (p.h + z) ,             // hu^2 + g(H^2 - 2zH) / 2
                 p.h * p.v * p.u};                                              // hvu
 }
 
 
-Vec3 CabaretScheme2D::make_H(Point3 const& p, double z) {
-    return Vec3{p.h * p.v,                                                      // hv
+Vec3<double> CabaretScheme2D::make_H(Point3 const& p, double z, double hT, double hB) {
+    return Vec3<double>{p.h * p.v,                                                      // hv
                 p.h * p.v * p.u,                                                // hvu
-                p.h * sqr(p.v) + g * (sqr(p.h + z) - 2 * z * (p.h + z)) * 0.5}; // hv^2 + g(H^2 - 2zH) / 2
+                p.h * sqr(p.v) + 0.5 * g * (hT + hB) * (p.h + z)};              // hv^2 + g(H^2 - 2zH) / 2
 }
 
 
-Point3 CabaretScheme2D::make_Point3_from_U(Vec3 const& U) {
+Point3 CabaretScheme2D::make_Point3_from_U(Vec3<double> const& U) {
     return Point3{U.b / U.a, // u
                   U.c / U.a, // v
                   U.a};      // h
@@ -451,10 +406,10 @@ void CabaretScheme2D::first_phase() {
             CellView cell = get_cell(i, j);
             Point3& half_step_c = half_step_center[i][j];
             Vec3 U_c = make_U(cell.c);
-            Vec3 G_R = make_G(cell.R, cell.zR);
-            Vec3 G_L = make_G(cell.L, cell.zL);
-            Vec3 H_T = make_H(cell.T, cell.zT);
-            Vec3 H_B = make_H(cell.B, cell.zB);
+            Vec3 G_R = make_G(cell.R, cell.zR, cell.L.h, cell.R.h);
+            Vec3 G_L = make_G(cell.L, cell.zL, cell.L.h, cell.R.h);
+            Vec3 H_T = make_H(cell.T, cell.zT, cell.T.h, cell.B.h);
+            Vec3 H_B = make_H(cell.B, cell.zB, cell.T.h, cell.B.h);
             Vec3 U_half_step_c = U_c + 0.5 * dt * ((G_L - G_R) / dx + (H_B - H_T) / dy);
             half_step_c = make_Point3_from_U(U_half_step_c);
             //
@@ -467,34 +422,37 @@ void CabaretScheme2D::first_phase() {
 
 void CabaretScheme2D::second_phase() {
     //Вычисление границ
-    //...
+    compute_boundaries(Side::LEFT);
+    compute_boundaries(Side::RIGHT);
+    compute_boundaries(Side::TOP);
+    compute_boundaries(Side::BOTTOM);
     //
 
     //Вычисление потоковых величин на вертикальных гранях
-    for(int i = 0; i < nx; ++i) {
-        for(int j = 1; j < ny; ++j) {
-            Vec3 invariants_left_cell = compute_invariants(i, j - 1, Side::LEFT);
+    for(int i = 1; i < nx; ++i) {
+        for(int j = 0; j < ny; ++j) {
+            Vec3 invariants_left_cell = compute_invariants(i - 1, j, Side::LEFT);
             Vec3 invariants_right_cell = compute_invariants(i, j, Side::RIGHT);
-            Vec3 char_speeds_center_half_step_left = make_char_speeds_x(half_step_center[i][j - 1]);
+            Vec3 char_speeds_center_half_step_left = make_char_speeds_x(half_step_center[i - 1][j]);
             Vec3 char_speeds_center_half_step_right = make_char_speeds_x(half_step_center[i][j]);
             Vec3 sum_char_speeds = char_speeds_center_half_step_left + char_speeds_center_half_step_right;
             Vec3 invariants = choose_invariants(sum_char_speeds, invariants_left_cell, invariants_right_cell);
             CellView cell_next = get_next_cell(i, j);
-            cell_next.L = make_Point3_from_invariants_x(invariants);
+            cell_next.L = make_Point3_from_invariants_x(invariants, cell_next.zL);
         }
     }
 
     //Вычисление потоковых величин на горизонтальных гранях
-    for(int j = 0; j < ny; ++j) {
-        for(int i = 1; i < nx; ++i) {
-            Vec3 invariants_bottom_cell = compute_invariants(i - 1, j, Side::BOTTOM);
+    for(int j = 1; j < ny; ++j) {
+        for(int i = 0; i < nx; ++i) {
+            Vec3 invariants_bottom_cell = compute_invariants(i, j - 1, Side::BOTTOM);
             Vec3 invariants_top_cell = compute_invariants(i, j, Side::TOP);
-            Vec3 char_speeds_center_half_step_left = make_char_speeds_y(half_step_center[i - 1][j]);
+            Vec3 char_speeds_center_half_step_left = make_char_speeds_y(half_step_center[i][j - 1]);
             Vec3 char_speeds_center_half_step_right = make_char_speeds_y(half_step_center[i][j]);
             Vec3 sum_char_speeds = char_speeds_center_half_step_left + char_speeds_center_half_step_right;
             Vec3 invariants = choose_invariants(sum_char_speeds, invariants_bottom_cell, invariants_top_cell);
             CellView cell_next = get_next_cell(i, j);
-            cell_next.B = make_Point3_from_invariants_y(invariants);
+            cell_next.B = make_Point3_from_invariants_y(invariants, cell_next.zB);
         }
     }
 
@@ -503,59 +461,152 @@ void CabaretScheme2D::second_phase() {
     
 }
 
-Point3 CabaretScheme2D::make_Point3_from_invariants_x(Vec3 const& I) {
-    return Point3{0.5 * (I.a + I.b),
-                  I.c,
-                  1 / g * sqr(0.25 * (I.a - I.b))};
+
+void CabaretScheme2D::compute_boundaries(Side side) {
+
+    //пока что реализация только граничных условий непротекания
+    switch (side)
+    {
+
+    case Side::LEFT: // крайняя левая вертикальная грань
+
+        for(int j = 0; j < ny; ++j) {
+            
+            next_face_x[0][j].u = 0.0; // нормальная скорость ноль
+
+            Vec3<Vec2> invariants_right_cell = compute_invariants(0, j, Side::RIGHT); // вычисление приходящих инвариантов
+            Vec3<double> char_speeds_center_half_step_right = make_char_speeds_x(half_step_center[0][j]); // вычисление хар-их скоростей
+            next_face_x[0][j].h = (-invariants_right_cell.b.a) * invariants_right_cell.a.b / g - z_face_x[0][j]; // h = I_2x^2/(4g)
+            if (char_speeds_center_half_step_right.c < 0) {
+                next_face_x[0][j].v = invariants_right_cell.c.a;
+            //Иначе берём инвариант с предыдущего временного слоя
+            } else {
+                next_face_x[0][j].v = half_step_center[0][j].v;
+            }
+
+        }    
+
+        break;
+    
+    case Side::RIGHT: // карйняя правая вертикальная грань
+
+        for(int j = 0; j < ny; ++j) {
+
+            next_face_x[nx][j].u = 0.0; // нормальная скорость ноль
+
+            Vec3<Vec2> invariants_left_cell = compute_invariants(nx - 1, j, Side::LEFT); // вычисление приходящих инвариантов
+            Vec3<double> char_speeds_center_half_step_left = make_char_speeds_x(half_step_center[nx - 1][j]); // вычисление хар-их скоростей
+            next_face_x[nx][j].h = invariants_left_cell.a.a * invariants_left_cell.a.b / g - z_face_x[nx][j]; // h = I_1x^2/(4g)
+            if (char_speeds_center_half_step_left.c > 0) {
+                next_face_x[nx][j].v = invariants_left_cell.c.a;
+            //Иначе берём инвариант с предыдущего временного слоя
+            } else {
+                next_face_x[nx][j].v = half_step_center[nx - 1][j].v;
+            }
+
+        }    
+
+        break;
+
+    case Side::TOP: // крайняя верхняя горизонтальная грань
+
+        for(int i = 0; i < nx; ++i) {
+
+            next_face_y[i][ny].v = 0.0; // нормальная скорость ноль
+
+            Vec3<Vec2> invariants_bottom_cell = compute_invariants(i, ny - 1, Side::BOTTOM); // вычисление приходящих инвариантов
+            Vec3<double> char_speeds_center_half_step_bottom = make_char_speeds_y(half_step_center[i][ny - 1]); // вычисление хар-их скоростей
+            next_face_y[i][ny].h = invariants_bottom_cell.a.a * invariants_bottom_cell.a.b / g - z_face_y[i][ny]; // h = I_1y^2/(4g)
+            if (char_speeds_center_half_step_bottom.c > 0) {
+                next_face_y[i][ny].u = invariants_bottom_cell.c.a;
+            //Иначе берём инвариант с предыдущего временного слоя
+            } else {
+                next_face_y[i][ny].u = half_step_center[i][ny - 1].u;
+            }
+
+        }    
+
+        break;
+
+    case Side::BOTTOM: // крайняя нижняя грань
+
+        for(int i = 0; i < nx; ++i) {
+
+            next_face_y[i][0].v = 0.0; // нормальная скорость ноль
+
+            Vec3<Vec2> invariants_top_cell = compute_invariants(i, 0, Side::TOP); // вычисление приходящих инвариантов
+            Vec3<double> char_speeds_center_half_step_top = make_char_speeds_y(half_step_center[i][0]); // вычисление хар-их скоростей
+            next_face_y[i][0].h = (-invariants_top_cell.b.a) * invariants_top_cell.b.b / g - z_face_y[i][0]; // h = I_1y^2/(4g)
+            if (char_speeds_center_half_step_top.c < 0) {
+                next_face_y[i][0].u = invariants_top_cell.c.a;
+            //Иначе берём инвариант с предыдущего временного слоя
+            } else {
+                next_face_y[i][0].u = half_step_center[i][0].u;
+            }
+
+        }      
+
+        break;
+
+    }
+
 }
 
 
-Point3 CabaretScheme2D::make_Point3_from_invariants_y(Vec3 const& I) {
-    return Point3{I.c,
-                  0.5 * (I.a + I.b),
-                  1 / g * sqr(0.25 * (I.a - I.b))};
+
+Point3 CabaretScheme2D::make_Point3_from_invariants_x(Vec3<Vec2> const& I, double z){
+    double H = (I.a.a - I.b.a) / (g * (1 / I.a.b + 1 / I.b.b));
+    return Point3{I.a.a - g / I.a.b * H,
+                  I.c.a,
+                  H - z};
 }
 
 
-Vec3 CabaretScheme2D::choose_invariants(Vec3 const& char_speeds_sum, Vec3 const& I_minus, Vec3 const& I_plus) {
-    return Vec3{(char_speeds_sum.a > 0 ? I_minus.a : I_plus.a),
+Point3 CabaretScheme2D::make_Point3_from_invariants_y(Vec3<Vec2> const& I, double z) {
+    double H = (I.a.a - I.b.a) / (g * (1 / I.a.b + 1 / I.b.b));
+    return Point3{I.c.a,
+                  I.a.a - g / I.a.b * H,
+                  H - z};
+}
+
+
+Vec3<Vec2> CabaretScheme2D::choose_invariants(Vec3<double> const& char_speeds_sum, Vec3<Vec2> const& I_minus, Vec3<Vec2> const& I_plus) {
+    return Vec3<Vec2>{(char_speeds_sum.a > 0 ? I_minus.a : I_plus.a),
                 (char_speeds_sum.b > 0 ? I_minus.b : I_plus.b),
                 (char_speeds_sum.c > 0 ? I_minus.c : I_plus.c)};
 }
 
 
-Vec3 CabaretScheme2D::compute_invariants(int i, int j, Side side) {
+Vec3<Vec2> CabaretScheme2D::compute_invariants(int i, int j, Side side) {
 
     CellView cell = get_cell(i, j);
-    Vec3 I_stream_n;      // потоковое состояние на слое n (из стороны side)
-    Vec3 I_center_half;   // центровое состояние на слое n+1/2
-    Vec3 I_center_n;      // центровое на слое n
-    Vec3 I_opp_stream_n;  // потоковое с противоположной стороны на слое n
+    Vec3<Vec2> I_stream_n;      // потоковое состояние на слое n (из стороны side)
+    Vec3<Vec2> I_center_half;   // центровое состояние на слое n+1/2
+    Vec3<Vec2> I_center_n;      // центровое на слое n
+    Vec3<Vec2> I_opp_stream_n;  // потоковое с противоположной стороны на слое n
 
 
     // Вычисление инвариантов вдоль оси x
     if (side == Side::LEFT or side == Side::RIGHT) {
-        double b_0 = (side == Side::LEFT ? cell.zR : cell.zL);
-        double b_q = (side == Side::LEFT ? cell.zL : cell.zR);
-        double b_c = cell.zc;
         Point3 const& p = (side == Side::LEFT ? cell.L : cell.R);
-        I_stream_n = make_invariants_x(p, b_0, b_q);
-        I_center_half = make_invariants_x(half_step_center[i][j], b_0, b_c);
-        I_center_n = make_invariants_x(cell.c, b_0, b_c);
+        double z = (side == Side::LEFT ? cell.zL : cell.zR);
+        I_stream_n = make_invariants_x(p, z, half_step_center[i][j].h);
+        I_center_half = make_invariants_x(half_step_center[i][j], cell.zc, half_step_center[i][j].h);
+        I_center_n = make_invariants_x(cell.c, cell.zc, half_step_center[i][j].h);
         Point3 const& p_other = (side == Side::LEFT ? cell.R : cell.L);
-        I_opp_stream_n = make_invariants_x(p_other, b_0, b_0);
+        z = (side == Side::LEFT ? cell.zR : cell.zL);
+        I_opp_stream_n = make_invariants_x(p_other, z, half_step_center[i][j].h);
 
     // Иначе вычисляем инварианты вдоль оси y
     } else {
-        double b_0 = (side == Side::BOTTOM ? cell.zT : cell.zB);
-        double b_q = (side == Side::BOTTOM ? cell.zB : cell.zT);
-        double b_c = cell.zc;
         Point3 const& p = (side == Side::BOTTOM ? cell.B : cell.T);
-        I_stream_n = make_invariants_y(p, b_0, b_q);
-        I_center_half = make_invariants_y(half_step_center[i][j], b_0, b_c);
-        I_center_n = make_invariants_y(cell.c, b_0, b_c);
+        double z = (side == Side::BOTTOM ? cell.zB : cell.zT);
+        I_stream_n = make_invariants_y(p, z, half_step_center[i][j].h);
+        I_center_half = make_invariants_y(half_step_center[i][j], cell.zc, half_step_center[i][j].h);
+        I_center_n = make_invariants_y(cell.c, cell.zc, half_step_center[i][j].h);
         Point3 const& p_other = (side == Side::BOTTOM ? cell.T : cell.B);
-        I_opp_stream_n = make_invariants_y(p_other, b_0, b_0);
+        z = (side == Side::BOTTOM ? cell.zT : cell.zB);
+        I_opp_stream_n = make_invariants_y(p_other, z, half_step_center[i][j].h);
     }
 
     // Инвариант приходящий на новый временной слой
@@ -574,31 +625,33 @@ Vec3 CabaretScheme2D::compute_invariants(int i, int j, Side side) {
 }
 
 
-Vec3 CabaretScheme2D::make_invariants_x(Point3 const& p, double b_0, double b_q) {
-    return Vec3{p.u + 2 * std::sqrt(g * (p.h - (b_0 - b_q))),
-                p.u - 2 * std::sqrt(g * (p.h - (b_0 - b_q))),
-                p.v};
+Vec3<Vec2> CabaretScheme2D::make_invariants_x(Point3 const& p, double z, double h_half_step) {
+    double c = std::sqrt(g * h_half_step);
+    return Vec3<Vec2>{Vec2{p.u + g / c * (z + p.h), c},
+                      Vec2{p.u - g / c * (z + p.h), c},
+                      Vec2{p.v, c}};
 }
 
 
-Vec3 CabaretScheme2D::make_invariants_y(Point3 const& p, double b_0, double b_q) {
-    return Vec3{p.v + 2 * std::sqrt(g * (p.h - (b_0 - b_q))),
-                p.v - 2 * std::sqrt(g * (p.h - (b_0 - b_q))),
-                p.u};
+Vec3<Vec2> CabaretScheme2D::make_invariants_y(Point3 const& p, double z, double h_half_step) {
+    double c = std::sqrt(g * h_half_step);
+    return Vec3<Vec2>{Vec2{p.v + g / c * (z + p.h), c},
+                      Vec2{p.v - g / c * (z + p.h), c},
+                      Vec2{p.u, c}};
 }
 
 
-Vec3 CabaretScheme2D::make_char_speeds_x(Point3 const& p) {
-    return Vec3 {p.u + std::sqrt(g * p.h),
-                 p.u - std::sqrt(g * p.h),
-                 p.u};
+Vec3<double> CabaretScheme2D::make_char_speeds_x(Point3 const& p) {
+    return Vec3<double> {p.u + std::sqrt(g * p.h),
+                         p.u - std::sqrt(g * p.h),
+                         p.u};
 }
 
 
-Vec3 CabaretScheme2D::make_char_speeds_y(Point3 const& p) {
-    return Vec3 {p.v + std::sqrt(g * p.h),
-                 p.v - std::sqrt(g * p.h),
-                 p.v};
+Vec3<double> CabaretScheme2D::make_char_speeds_y(Point3 const& p) {
+    return Vec3<double> {p.v + std::sqrt(g * p.h),
+                         p.v - std::sqrt(g * p.h),
+                         p.v};
 }
 
 
@@ -613,10 +666,10 @@ void CabaretScheme2D::third_phase() {
             CellView cell = get_cell(i, j);
             Point3& half_step_c = half_step_center[i][j];
             Vec3 U_half_step_c = make_U(half_step_c);
-            Vec3 G_R = make_G(cell.R, cell.zR);
-            Vec3 G_L = make_G(cell.L, cell.zL);
-            Vec3 H_T = make_H(cell.T, cell.zT);
-            Vec3 H_B = make_H(cell.B, cell.zB);
+            Vec3 G_R = make_G(cell.R, cell.zR, cell.L.h, cell.R.h);
+            Vec3 G_L = make_G(cell.L, cell.zL, cell.L.h, cell.R.h);
+            Vec3 H_T = make_H(cell.T, cell.zT, cell.T.h, cell.B.h);
+            Vec3 H_B = make_H(cell.B, cell.zB, cell.T.h, cell.B.h);
             Vec3 U_c = U_half_step_c + 0.5 * dt * ((G_L - G_R) / dx + (H_B - H_T) / dy);
             cell.c = make_Point3_from_U(U_c);
             //

@@ -1,4 +1,5 @@
 #include "cabaret_scheme.h"
+#include "cabaret_scheme_2D.h"
 
 
 int
@@ -39,37 +40,37 @@ main() {
     
 
 
-    //Dam break tests
-    Type_grid type_grid = EVEN;
-    double CFL = 0.3;
-    double break_pt = 5.0;
-    double (* u_0_left)(double) = u_0_411_left_right;
-    double (* u_0_right)(double) = u_0_411_left_right;
-    double (* h_0_left)(double) = h_0_411_left;
-    double (* h_0_right)(double) = h_0_411_right;
-    double (* z)(double) = z_const;
-    //4.1.1.
-    Boundary<BoundaryType::DEFAULT> left_boundary(0.005, 0.0);
-    Boundary<BoundaryType::DEFAULT> right_boundary(0.001, 0.0);
+    // //Dam break tests
+    // Type_grid type_grid = EVEN;
+    // double CFL = 0.3;
+    // double break_pt = 5.0;
+    // double (* u_0_left)(double) = u_0_411_left_right;
+    // double (* u_0_right)(double) = u_0_411_left_right;
+    // double (* h_0_left)(double) = h_0_411_left;
+    // double (* h_0_right)(double) = h_0_411_right;
+    // double (* z)(double) = z_const;
+    // //4.1.1.
+    // Boundary<BoundaryType::DEFAULT> left_boundary(0.005, 0.0);
+    // Boundary<BoundaryType::DEFAULT> right_boundary(0.001, 0.0);
 
-    double start_x_pt = 0.0;
-    double end_x_pt = 10.0;
-    double start_t_pt = 0.0;
-    double end_t_pt = 6.0;
-    // double start_cmp_seg = 6.0;
-    // double end_cmp_seg = 14.0;
-    int cnt_x_pts_before_break_pt = 100;
-    int cnt_x_pts_after_break_pt = 100;
-    bool continuity = false;
+    // double start_x_pt = 0.0;
+    // double end_x_pt = 10.0;
+    // double start_t_pt = 0.0;
+    // double end_t_pt = 6.0;
+    // // double start_cmp_seg = 6.0;
+    // // double end_cmp_seg = 14.0;
+    // int cnt_x_pts_before_break_pt = 100;
+    // int cnt_x_pts_after_break_pt = 100;
+    // bool continuity = false;
 
-    std::string file_name = "./data/4.1.1";
-    Cabaret_scheme<BoundaryType::DEFAULT, BoundaryType::DEFAULT> cabaret_scheme_1(type_grid
-        , left_boundary
-        , right_boundary
-        , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
-        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, analytical_solution);
-    cabaret_scheme_1.compute();
-    cabaret_scheme_1.automodeling_solution(0.0, 10.0);
+    // std::string file_name = "./data/4.1.1";
+    // Cabaret_scheme<BoundaryType::DEFAULT, BoundaryType::DEFAULT> cabaret_scheme_1(type_grid
+    //     , left_boundary
+    //     , right_boundary
+    //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
+    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, analytical_solution);
+    // cabaret_scheme_1.compute();
+    // cabaret_scheme_1.automodeling_solution(0.0, 10.0);
     //
 
 
@@ -248,5 +249,10 @@ main() {
     // double err_2 = cabaret_scheme_2.automodeling_solution(start_cmp_seg, end_cmp_seg);
     // double approx_order_with_automodel_solution = std::log2(err_1 / err_2);
     // std::cout << "Порядок аппроксимации схемы с использованием аналитического решения: " << approx_order_with_automodel_solution << std::endl;
+
+
+    //Тестирование 2D
+    CabaretScheme2D cabaret2D(0.2, 100, 100, -1.0, 1.0, -1.0, 1.0, 12.0, u02D_1, v02D_1, h02D_1, z2Dfear, "./data/2D");
+    cabaret2D.compute();
 
 }
