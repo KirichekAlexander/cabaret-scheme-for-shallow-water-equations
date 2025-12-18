@@ -255,5 +255,25 @@ double z2Dfear(double x, double y) {
 }
 
 
+double h02D_gauss(double x, double y) {
+    return std::exp(-4.5 * (x * x + y * y)) + 1.0;
+}
+
+
+//Тест две волны разряжения
+double v02D_2(double x, double y) {
+    return 0.0;
+}
+
+double u02D_2(double x, double y) {
+    return (x > 0.0 ? 0.0 : -3.0);
+}
+
+
+double h02D_2(double x, double y) {
+    return (x > 0.0 ? 0.5 : 1.0);
+}
+
+
 
 #pragma GCC diagnostic pop

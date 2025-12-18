@@ -251,8 +251,18 @@ main() {
     // std::cout << "Порядок аппроксимации схемы с использованием аналитического решения: " << approx_order_with_automodel_solution << std::endl;
 
 
-    //Тестирование 2D
-    CabaretScheme2D cabaret2D(0.2, 100, 100, -1.0, 1.0, -1.0, 1.0, 12.0, u02D_1, v02D_1, h02D_1, z2Dfear, "./data/2D");
+    //Тестирование 2D well-balanced
+    // CabaretScheme2D cabaret2D(0.2, 100, 100, -1.0, 1.0, -1.0, 1.0, 1.0, u02D_1, v02D_1, h02D_1, z2Dfear, "./data/2D");
+    // cabaret2D.compute();
+
+
+    // Распад Гаусса
+    // CabaretScheme2D cabaret2D(0.2, 100, 100, -1.0, 1.0, -1.0, 1.0, 1.0, u02D_1, v02D_1, h02D_gauss, z2D_1, "./data/2D_gauss");
+    // cabaret2D.compute();
+
+    CabaretScheme2D cabaret2D(0.2, 100, 100, -10.0, 10.0, -1.0, 1.0, 0.6, u02D_2, v02D_2, h02D_2, z2D_1, "./data/2D_discharge_waves");
     cabaret2D.compute();
+
+
 
 }

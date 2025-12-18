@@ -31,21 +31,20 @@ struct Point3 {
 };
 
 
-struct Vec2
+struct InvC
 {
-    double a;
-    double b;
+    double I;
+    double c;
 
-    Vec2 operator+(Vec2 const& other) const;
-    Vec2 operator*(double k) const;
-    Vec2 operator-(Vec2 const& other) const;
-    Vec2 operator/(double k) const;
-    Vec2 operator*(Vec2 const& other) const;
-    Vec2 operator<(Vec2 const& other) const;
+    InvC operator+(InvC const& other) const;
+    InvC operator*(double k) const;
+    InvC operator-(InvC const& other) const;
+    InvC operator/(double k) const;
+    InvC operator*(InvC const& other) const;
 };
 
 
-Vec2 operator*(double k, Vec2 const& vec);
+InvC operator*(double k, InvC const& vec);
 
 
 template<typename T>
@@ -110,14 +109,17 @@ Vec3<T> operator*(double k, Vec3<T> const& vec) {
     return vec * k;
 }
 
-
-Vec3<Vec2> operator*(Vec3<double> const& vec1, Vec3<Vec2> const& vec2);
-
-
-Vec3<Vec2> min_invariants(std::initializer_list<Vec3<Vec2>> list);
+using Inv3 = Vec3<InvC>;
+using Vec3r = Vec3<double>;
 
 
-Vec3<Vec2> max_invariants(std::initializer_list<Vec3<Vec2>> list);
+Inv3 operator*(Vec3r const& vec1, Inv3 const& vec2);
+
+
+Inv3 min_invariants(std::initializer_list<Inv3> list);
+
+
+Inv3 max_invariants(std::initializer_list<Inv3> list);
 
 
 // Синонимы для массивов точек (u, v, h)

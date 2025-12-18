@@ -2,65 +2,66 @@
 
 
 //Реализация оператор для Vec3
-Vec2 Vec2::operator+(Vec2 const& other) const {
-    return Vec2{a + other.a,
-                b};
+InvC InvC::operator+(InvC const& other) const {
+    return InvC{I + other.I,
+                c};
 }
 
 
-Vec2 Vec2::operator*(double k) const {
-    return Vec2{a * k,
-                b};
+InvC InvC::operator*(double k) const {
+    return InvC{I * k,
+                c};
 }
 
-Vec2 Vec2::operator-(Vec2 const& other) const {
-    return Vec2{a - other.a,
-                b};
+InvC InvC::operator-(InvC const& other) const {
+    return InvC{I - other.I,
+                c};
 }
 
-Vec2 Vec2::operator/(double k) const {
-      return Vec2{a / k,
-                  b};
-}
-
-
-Vec2 Vec2::operator*(Vec2 const& other) const {
-    return Vec2{a * other.a,
-                b};
+InvC InvC::operator/(double k) const {
+      return InvC{I / k,
+                  c};
 }
 
 
-Vec2 operator*(double k, Vec2 const& vec) {
-    return vec * k;
+InvC InvC::operator*(InvC const& other) const {
+    return InvC{I * other.I,
+                c};
 }
 
 
-Vec3<Vec2> operator*(Vec3<double> const& vec1, Vec3<Vec2> const& vec2) {
-    return Vec3<Vec2>{Vec2{vec1.a * vec2.a.a , vec2.a.b},
-                      Vec2{vec1.b * vec2.b.a , vec2.b.b},
-                      Vec2{vec1.c * vec2.c.a , vec2.c.b}};
+InvC operator*(double k, InvC const& vec) {
+    return InvC{vec.I * k,
+                vec.c};
 }
 
 
-Vec3<Vec2> min_invariants(std::initializer_list<Vec3<Vec2>> list) {
-    std::initializer_list<Vec3<Vec2>>::iterator it = list.begin();
-    Vec3<Vec2> res = *it++;
+Inv3 operator*(Vec3r const& vec1, Inv3 const& vec2) {
+    return Inv3{InvC{vec1.a * vec2.a.I , vec2.a.c},
+                InvC{vec1.b * vec2.b.I , vec2.b.c},
+                InvC{vec1.c * vec2.c.I , vec2.c.c}};
+}
+
+
+Inv3 min_invariants(std::initializer_list<Inv3> list) {
+    std::initializer_list<Inv3>::iterator it = list.begin();
+    Inv3 res = *it++;
     for (; it != list.end(); ++it) {
-        res.a = (res.a.a > (it->a).a ? it->a : res.a);
-        res.b = (res.b.a > (it->b).a ? it->b : res.b);
-        res.c = (res.c.a > (it->c).a ? it->c : res.c);
+        res.a = (res.a.I > (it->a).I ? it->a : res.a);
+        res.b = (res.b.I > (it->b).I ? it->b : res.b);
+        res.c = (res.c.I > (it->c).I ? it->c : res.c);
     }
     return res;
 }
 
 
-Vec3<Vec2> max_invariants(std::initializer_list<Vec3<Vec2>> list) {
-    std::initializer_list<Vec3<Vec2>>::iterator it = list.begin();
-    Vec3<Vec2> res = *it++;
+Inv3 max_invariants(std::initializer_list<Inv3> list) {
+    std::initializer_list<Inv3>::iterator it = list.begin();
+    Inv3 res = *it++;
     for (; it != list.end(); ++it) {
-        res.a = (res.a.a < (it->a).a ? it->a : res.a);
-        res.b = (res.b.a < (it->b).a ? it->b : res.b);
-        res.c = (res.c.a < (it->c).a ? it->c : res.c);
+        res.a = (res.a.I < (it->a).I ? it->a : res.a);
+        res.b = (res.b.I < (it->b).I ? it->b : res.b);
+        res.c = (res.c.I < (it->c).I ? it->c : res.c);
     }
     return res;
 }

@@ -107,5 +107,15 @@ double h02D_1(double x, double y);
 
 double z2Dfear(double x, double y);
 
+double h02D_gauss(double x, double y);
+
+//Тест две волны разряжения
+double v02D_2(double x, double y);
+
+double u02D_2(double x, double y);
+
+double h02D_2(double x, double y);
+
+
 
 #endif
