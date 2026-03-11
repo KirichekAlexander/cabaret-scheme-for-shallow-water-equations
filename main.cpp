@@ -260,9 +260,19 @@ main() {
     // CabaretScheme2D cabaret2D(0.2, 100, 100, -1.0, 1.0, -1.0, 1.0, 1.0, u02D_1, v02D_1, h02D_gauss, z2D_1, "./data/2D_gauss");
     // cabaret2D.compute();
 
-    CabaretScheme2D cabaret2D(0.2, 100, 100, -10.0, 10.0, -1.0, 1.0, 0.6, u02D_2, v02D_2, h02D_2, z2D_1, "./data/2D_discharge_waves");
-    cabaret2D.compute();
+    //Волны разряжения 2D
+    // CabaretScheme2D cabaret2D(0.2, 100, 100, -10.0, 10.0, -1.0, 1.0, 0.6, u02D_2, v02D_2, h02D_2, z2D_1, "./data/2D_discharge_waves");
+    // cabaret2D.compute();
 
+
+    //Тест1 из диплома
+    // CabaretScheme2D cabaret2D(0.2, 101, 101, -0.5, 0.5, -0.5, 0.5, 2.0, u02D_dip1, v02D_dip1, h02D_dip1, z2D_1, "./data/2D_dip1");
+    // cabaret2D.compute();
+
+
+    //Тест2 из диплома
+    CabaretScheme2D cabaret2D(0.2, 101, 101, -0.5, 0.5, -0.5, 0.5, 14.65, u02D_dip2, v02D_dip2, h02D_dip2, z2D_1, "./data/2D_dip2");
+    cabaret2D.compute();
 
 
 }

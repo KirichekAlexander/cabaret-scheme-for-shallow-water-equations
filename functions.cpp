@@ -275,5 +275,65 @@ double h02D_2(double x, double y) {
 }
 
 
+//Численные эксперименты из диплома
+//Тест1
+double h02D_dip1(double x, double y) {
+    double alpha = 0.404;
+    double beta = 0.3;
+    double r = std::sqrt(x * x + y * y);
+    double r0 = 0.03;
+    return -(alpha * alpha / (4.0 * beta)) * std::exp(2.0 * beta * (1.0 - (r/r0) * (r/r0))) + 1.0;
+}
+
+
+double u02D_dip1(double x, double y) {
+    double alpha = 0.404;
+    double beta = 0.3;
+    double r = std::sqrt(x * x + y * y);
+    double r0 = 0.03;
+    return alpha / r0 * std::exp(beta * (1.0 - (r/r0) * (r/r0))) * y;
+}
+
+
+double v02D_dip1(double x, double y) {
+    double alpha = 0.404;
+    double beta = 0.3;
+    double r = std::sqrt(x * x + y * y);
+    double r0 = 0.03;
+    return -alpha / r0 * std::exp(beta * (1.0 - (r/r0) * (r/r0))) * x;
+}
+
+
+//Тест2
+double h02D_dip2(double x, double y) {
+    double alpha = 0.404;
+    double beta = 0.3;
+    double r1 = std::sqrt((x - 0.1) * (x - 0.1) + y * y);
+    double r2 = std::sqrt((x + 0.1) * (x + 0.1) + y * y);
+    double r0 = 0.03;
+    return -(alpha * alpha / (4.0 * beta)) * std::exp(2.0 * beta * (1.0 - (r1/r0) * (r1/r0))) 
+           - (alpha * alpha / (4.0 * beta)) * std::exp(2.0 * beta * (1.0 - (r2/r0) * (r2/r0))) + 1.0;
+}
+
+
+double u02D_dip2(double x, double y) {
+    double alpha = 0.404;
+    double beta = 0.3;
+    double r1 = std::sqrt((x - 0.1) * (x - 0.1) + y * y);
+    double r2 = std::sqrt((x + 0.1) * (x + 0.1) + y * y);
+    double r0 = 0.03;
+    return alpha / r0 * std::exp(beta * (1.0 - (r1/r0) * (r1/r0))) * y - alpha / r0 * std::exp(beta * (1.0 - (r2/r0) * (r2/r0))) * y;
+}
+
+
+double v02D_dip2(double x, double y) {
+    double alpha = 0.404;
+    double beta = 0.3;
+    double r1 = std::sqrt((x - 0.1) * (x - 0.1) + y * y);
+    double r2 = std::sqrt((x + 0.1) * (x + 0.1) + y * y);
+    double r0 = 0.03;
+    return -alpha / r0 * std::exp(beta * (1.0 - (r1/r0) * (r1/r0))) * (x - 0.1) + alpha / r0 * std::exp(beta * (1.0 - (r2/r0) * (r2/r0))) * (x + 0.1);
+}
+
 
 #pragma GCC diagnostic pop

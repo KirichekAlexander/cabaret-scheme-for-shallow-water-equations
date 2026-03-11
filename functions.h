@@ -7,7 +7,7 @@
 
 
 //Ускорение свободного падения
-const double g = 9.81;
+const double g = 1;
 
 
 double z_const(double x);
@@ -116,6 +116,26 @@ double u02D_2(double x, double y);
 
 double h02D_2(double x, double y);
 
+
+//Численные эксперименты из диплома
+//Тест1
+double h02D_dip1(double x, double y);
+
+
+double u02D_dip1(double x, double y);
+
+
+double v02D_dip1(double x, double y);
+
+
+//Тест2
+double h02D_dip2(double x, double y);
+
+
+double u02D_dip2(double x, double y);
+
+
+double v02D_dip2(double x, double y);
 
 
 #endif

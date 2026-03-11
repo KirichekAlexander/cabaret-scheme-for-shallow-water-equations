@@ -391,6 +391,7 @@ Vec3r CabaretScheme2D::make_H(Point3 const& p, double z, double hT, double hB) {
 }
 
 
+
 Point3 CabaretScheme2D::make_Point3_from_U(Vec3r const& U) {
     return Point3{U.b / U.a, // u
                   U.c / U.a, // v
