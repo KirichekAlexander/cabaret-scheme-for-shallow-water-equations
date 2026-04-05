@@ -934,7 +934,7 @@ std::pair<double, double> Cabaret_scheme<LeftBT, RightBT>::compute_invariant(Typ
     double cell_right_invariant = stream_u_grid[cell_idx + 1] + num_koeff * G * (stream_z_grid[cell_idx + 1] + 
         stream_h_grid[cell_idx + 1]);
 
-    double p = 0.0;
+    double p = 0.04;
     double invariant = (2.0 * cell_center_conservative_invariant - (1 - p) * (type_invariant == LEFT_CELL ? cell_left_invariant : cell_right_invariant)) / (1 + p);
     
     double additional_term = num_koeff * tau_grid[t_idx] * center_conservative_u_grid[cell_idx] * G * (stream_z_grid[cell_idx + 1] -

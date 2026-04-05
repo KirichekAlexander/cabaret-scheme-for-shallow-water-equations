@@ -7,29 +7,29 @@ main() {
     // Type_grid type_grid = EVEN;
     // double CFL = 0.3;
     // double break_pt = 12.5;
-    // double (* u_0)(double) = u_0_313;
-    // double (* h_0)(double) = h_0_313;
+    // double (* u_0)(double) = u_0_315;
+    // double (* h_0)(double) = h_0_315;
     // double (* z)(double) = z_lakes;
     // //3.1.1
-    // // Boundary<BoundaryType::DEFAULT> left_boundary(0.5, 0.0);
-    // // Boundary<BoundaryType::DEFAULT> right_boundary(left_boundary);
+    // Boundary<BoundaryType::DEFAULT> left_boundary(0.5, 0.0);
+    // Boundary<BoundaryType::DEFAULT> right_boundary(left_boundary);
     // //3.1.3
-    // Boundary<BoundaryType::FLUVIAL_FLUX_GIVEN> left_boundary(4.42); // с 4.0 и 4.42 был сверхзвук
+    // Boundary<BoundaryType::FLUVIAL_FLUX_GIVEN> left_boundary(3.5); // с 4.0 и 4.42 был сверхзвук
     // Boundary<BoundaryType::FLUVIAL_H_GIVEN> right_boundary(2.0);
-    // //3.1.5
-    // // Boundary<BoundaryType::FLUVIAL_FLUX_GIVEN> left_boundary(0.18); // с 4.0 и 4.42 был сверхзвук
-    // // Boundary<BoundaryType::FLUVIAL_H_GIVEN> right_boundary(0.33);
+    //3.1.5
+    // Boundary<BoundaryType::FLUVIAL_FLUX_GIVEN> left_boundary(0.18); // с 4.0 и 4.42 был сверхзвук
+    // Boundary<BoundaryType::FLUVIAL_H_GIVEN> right_boundary(0.33);
     // double start_x_pt = 0.0;
     // double end_x_pt = 25.0;
     // double start_t_pt = 0.0;
     // double end_t_pt = 100.0;
-    // // double start_cmp_seg = 6.0;
-    // // double end_cmp_seg = 14.0;
+    // double start_cmp_seg = 6.0;
+    // double end_cmp_seg = 14.0;
     // int cnt_x_pts_before_break_pt = 100;
     // int cnt_x_pts_after_break_pt = 100;
     // bool continuity = true;
 
-    // std::string file_name = "./data/3.1.3.lake";
+    // std::string file_name = "./data/3.1.3_lake";
     // Cabaret_scheme<BoundaryType::FLUVIAL_FLUX_GIVEN, BoundaryType::FLUVIAL_H_GIVEN> cabaret_scheme_1(type_grid
     //     , left_boundary
     //     , right_boundary
@@ -40,40 +40,40 @@ main() {
 
 
     //Dam break tests
-    Type_grid type_grid = EVEN;
-    double CFL = 0.3;
-    double break_pt = 5.0;
-    double (* u_0_left)(double) = u_0_411_left_right;
-    double (* u_0_right)(double) = u_0_411_left_right;
-    double (* h_0_left)(double) = h_0_411_left;
-    double (* h_0_right)(double) = h_0_411_right;
-    double (* z)(double) = z_const;
-    //4.1.1.
-    Boundary<BoundaryType::DEFAULT> left_boundary(0.005, 0.0);
-    Boundary<BoundaryType::DEFAULT> right_boundary(0.001, 0.0);
+    // Type_grid type_grid = EVEN;
+    // double CFL = 0.3;
+    // double break_pt = 5.0;
+    // double (* u_0_left)(double) = u_0_411_left_right;
+    // double (* u_0_right)(double) = u_0_411_left_right;
+    // double (* h_0_left)(double) = h_0_411_left;
+    // double (* h_0_right)(double) = h_0_411_right;
+    // double (* z)(double) = z_const;
+    // //4.1.1.
+    // Boundary<BoundaryType::DEFAULT> left_boundary(0.005, 0.0);
+    // Boundary<BoundaryType::DEFAULT> right_boundary(0.001, 0.0);
 
-    double start_x_pt = 0.0;
-    double end_x_pt = 10.0;
-    double start_t_pt = 0.0;
-    double end_t_pt = 6.0;
-    // double start_cmp_seg = 6.0;
-    // double end_cmp_seg = 14.0;
-    int cnt_x_pts_before_break_pt = 100;
-    int cnt_x_pts_after_break_pt = 100;
-    bool continuity = false;
+    // double start_x_pt = 0.0;
+    // double end_x_pt = 10.0;
+    // double start_t_pt = 0.0;
+    // double end_t_pt = 6.0;
+    // // double start_cmp_seg = 6.0;
+    // // double end_cmp_seg = 14.0;
+    // int cnt_x_pts_before_break_pt = 100;
+    // int cnt_x_pts_after_break_pt = 100;
+    // bool continuity = false;
 
-    std::string file_name = "./data/4.1.1";
-    Cabaret_scheme<BoundaryType::DEFAULT, BoundaryType::DEFAULT> cabaret_scheme_1(type_grid
-        , left_boundary
-        , right_boundary
-        , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
-        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, analytical_solution);
-    cabaret_scheme_1.compute();
-    cabaret_scheme_1.automodeling_solution(0.0, 10.0);
+    // std::string file_name = "./data/4.1.1";
+    // Cabaret_scheme<BoundaryType::DEFAULT, BoundaryType::DEFAULT> cabaret_scheme_1(type_grid
+    //     , left_boundary
+    //     , right_boundary
+    //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
+    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, analytical_solution);
+    // cabaret_scheme_1.compute();
+    // cabaret_scheme_1.automodeling_solution(0.0, 10.0);
     //
 
 
-    // //Тесты вкусно и точка
+    // // //Тесты вкусно и точка
     // Type_grid type_grid = EVEN;
     // double CFL = 0.3;
     // double break_pt = 500.0;
@@ -82,14 +82,14 @@ main() {
     // double (* h_0_left)(double) = h_0_321;
     // double (* h_0_right)(double) = h_0_321;
     // double (* z)(double) = z_321;
-    // //3.2.1
+    // // //3.2.1
     // Boundary<BoundaryType::FLUVIAL_FLUX_GIVEN> left_boundary(1.5);
     // Boundary<BoundaryType::FLUVIAL_H_GIVEN> right_boundary(h_ex(1000));
 
     // double start_x_pt = 0.0;
     // double end_x_pt = 1000.0;
     // double start_t_pt = 0.0;
-    // double end_t_pt = 30000.0;
+    // double end_t_pt = 5000.0;
     // // double start_cmp_seg = 6.0;
     // // double end_cmp_seg = 14.0;
     // int cnt_x_pts_before_break_pt = 1000;
@@ -103,7 +103,7 @@ main() {
     //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
     //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, nullptr);
     // cabaret_scheme_1.compute();
-    //
+    
 
 
     // std::string file_name = "./data/hydrajumps";
