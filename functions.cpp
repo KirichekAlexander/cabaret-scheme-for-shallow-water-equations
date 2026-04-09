@@ -4,6 +4,24 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
+double one_wave_h(double x) {
+    if (x < 0) {
+        return 4.0;
+    } else {
+        return 3.0;
+    }
+}
+
+
+double one_wave_u(double x) {
+    if (x < 0) {
+        return 0.0;
+    } else {
+        return 2.0 * (2.0 - std::sqrt(3.0));
+    }
+}
+
+
 double z_const(double) {
     return 0.0;
 }
