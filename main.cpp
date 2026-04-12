@@ -270,8 +270,13 @@ main() {
     // cabaret2D.compute();
 
 
-    //Тест2 из диплома
-    CabaretScheme2D cabaret2D(0.2, 101, 101, -0.5, 0.5, -0.5, 0.5, 14.65, u02D_dip2, v02D_dip2, h02D_dip2, z2D_1, "./data/2D_dip2");
+    // //Тест2 из диплома
+    // CabaretScheme2D cabaret2D(0.2, 101, 101, -0.5, 0.5, -0.5, 0.5, 14.65, u02D_dip2, v02D_dip2, h02D_dip2, z2D_1, "./data/2D_dip2");
+    // cabaret2D.compute();
+
+
+    //Тест well-balanced
+    CabaretScheme2D cabaret2D(0.2, 101, 101, -1.0, 1.0, -1.0, 1.0, 100, u02D_1, v02D_1, h02D_dip2, well_balanced_2d_z, "./data/2D_well-balanced");
     cabaret2D.compute();
 
 

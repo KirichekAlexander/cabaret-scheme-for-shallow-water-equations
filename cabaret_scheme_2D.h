@@ -220,7 +220,8 @@ void CabaretScheme2D::init_fields(int i1, int i2,
             z[i][j] = z0(x[i], y[j]);
             points[i][j].u = u0(x[i], y[j]);
             points[i][j].v = v0(x[i], y[j]);
-            points[i][j].h = h0(x[i], y[j]);
+            // points[i][j].h = h0(x[i], y[j]);
+            points[i][j].h = 1.0 - z[i][j]; // well-balanced init
         }
     }
 
@@ -241,7 +242,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_x[0][j].u = 0.0;
             face_x[0][j].v = v0(x_face_x[0], y_center[j]);
-            face_x[0][j].h = h0(x_face_x[0], y_center[j]);
+            // face_x[0][j].h = h0(x_face_x[0], y_center[j]);
+            face_x[0][j].h = 1.0 - z_face_x[0][j]; // well-balanced init
 
         }    
 
@@ -255,7 +257,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_x[nx][j].u = 0.0;
             face_x[nx][j].v = v0(x_face_x[nx], y_center[j]);
-            face_x[nx][j].h = h0(x_face_x[nx], y_center[j]);
+            // face_x[nx][j].h = h0(x_face_x[nx], y_center[j]);
+            face_x[nx][j].h = 1.0 - z_face_x[nx][j]; // well-balanced init
 
         }    
 
@@ -269,7 +272,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_y[i][ny].u = u0(x_center[i], y_face_y[ny]);
             face_y[i][ny].v = 0.0;
-            face_y[i][ny].h = h0(x_center[i], y_face_y[ny]);
+            // face_y[i][ny].h = h0(x_center[i], y_face_y[ny]);
+            face_y[i][ny].h = 1.0 - z_face_y[i][ny]; // well-balanced init
 
         }    
 
@@ -283,7 +287,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_y[i][0].u = u0(x_center[i], y_face_y[0]);
             face_y[i][0].v = 0.0;
-            face_y[i][0].h = h0(x_center[i], y_face_y[0]);
+            // face_y[i][0].h = h0(x_center[i], y_face_y[0]);
+            face_y[i][0].h = 1.0 - z_face_y[i][0]; // well-balanced init
 
         }    
 

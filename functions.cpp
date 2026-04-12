@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <ctime>
 #include "functions.h"
 
 #pragma GCC diagnostic push
@@ -333,6 +335,11 @@ double v02D_dip2(double x, double y) {
     double r2 = std::sqrt((x + 0.1) * (x + 0.1) + y * y);
     double r0 = 0.03;
     return -alpha / r0 * std::exp(beta * (1.0 - (r1/r0) * (r1/r0))) * (x - 0.1) + alpha / r0 * std::exp(beta * (1.0 - (r2/r0) * (r2/r0))) * (x + 0.1);
+}
+
+
+double well_balanced_2d_z(double x, double y) {
+    return 0.3 * (std::rand() % 1000) / 1000.0;
 }
 
 

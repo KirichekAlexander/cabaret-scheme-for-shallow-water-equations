@@ -138,4 +138,6 @@ double u02D_dip2(double x, double y);
 double v02D_dip2(double x, double y);
 
 
+double well_balanced_2d_z(double x, double y);
+
 #endif
