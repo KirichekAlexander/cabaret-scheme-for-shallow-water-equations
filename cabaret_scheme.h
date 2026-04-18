@@ -498,13 +498,16 @@ double Cabaret_scheme<LeftBT, RightBT>::compute() {
 template<BoundaryType LeftBT, BoundaryType RightBT>
 void Cabaret_scheme<LeftBT, RightBT>::compute_x_grid() {
 
+    double dx = (end_x_pt- start_x_pt) / (cnt_x_pts - 1);
     if (type_grid == EVEN) {
-        
+        for(int i = 0; i < cnt_x_pts; ++i) {
+            x_grid[i] = start_x_pt + dx * i;
+        }
         //Вычисление равномерной сетки по x слева от разрыва
-        compute_even_grid(x_grid, 0, cnt_x_pts_before_break_pt + 2, start_x_pt, break_pt);
+        // compute_even_grid(x_grid, 0, cnt_x_pts_before_break_pt + 2, start_x_pt, break_pt);
         
-        //Вычисление равномерной сетки по x справа от разрыва
-        compute_even_grid(x_grid, cnt_x_pts_before_break_pt + 1, cnt_x_pts_after_break_pt + 2, break_pt, end_x_pt);
+        // //Вычисление равномерной сетки по x справа от разрыва
+        // compute_even_grid(x_grid, cnt_x_pts_before_break_pt + 1, cnt_x_pts_after_break_pt + 2, break_pt, end_x_pt);
 
     } else {
 
@@ -514,8 +517,8 @@ void Cabaret_scheme<LeftBT, RightBT>::compute_x_grid() {
 
     //Вычисление шагов сетки по x
     for (int i = 0; i < cnt_x_pts - 1; ++i) {
-        h_grid[i] = x_grid[i + 1] - x_grid[i];
-        conservative_x_grid[i] = x_grid[i] + h_grid[i] / 2.0;
+        h_grid[i] = dx;
+        conservative_x_grid[i] = x_grid[i] + 0.5 * dx;
     }
 
 }
@@ -765,9 +768,9 @@ void Cabaret_scheme<LeftBT, RightBT>::compute_tau(int t_idx) {
 
     }
 
-    if (t_idx < 200) {
-        tau = 0.0;
-    }
+    // if (t_idx < 200) {
+    //     tau = 0.0;
+    // }
 
     if ((end_t_pt - t_grid[t_idx]) < tau) {
 
@@ -790,13 +793,13 @@ void Cabaret_scheme<LeftBT, RightBT>::first_phase(int t_idx) {
     for(int i = 0; i < (cnt_x_pts - 1); ++i) {
 
         //Вычисление h в центре ячейки
-        center_conservative_h_grid[i] = conservative_h_grid[i] + tau_grid[t_idx] / 2.0 * (stream_h_grid[i] * stream_u_grid[i] -
+        center_conservative_h_grid[i] = conservative_h_grid[i] + tau_grid[t_idx] * 0.5 * (stream_h_grid[i] * stream_u_grid[i] -
             stream_h_grid[i + 1] * stream_u_grid[i + 1]) / h_grid[i];
 
         //Вычисление u в центре ячейки
-        center_conservative_u_grid[i] = (conservative_h_grid[i] * conservative_u_grid[i] + tau_grid[t_idx] / 2.0 * (stream_h_grid[i] * 
+        center_conservative_u_grid[i] = (conservative_h_grid[i] * conservative_u_grid[i] + tau_grid[t_idx] * 0.5 * (stream_h_grid[i] * 
             sqr(stream_u_grid[i]) - stream_h_grid[i + 1] * sqr(stream_u_grid[i + 1]) + g * (stream_h_grid[i] + 
-            stream_h_grid[i + 1]) / 2.0 * (stream_z_grid[i] + stream_h_grid[i] - stream_z_grid[i + 1] - stream_h_grid[i + 1])) /
+            stream_h_grid[i + 1]) * 0.5 * (stream_z_grid[i] + stream_h_grid[i] - stream_z_grid[i + 1] - stream_h_grid[i + 1])) /
             h_grid[i]) / center_conservative_h_grid[i];
 
 
@@ -964,7 +967,7 @@ std::pair<double, double> Cabaret_scheme<LeftBT, RightBT>::compute_invariant(Typ
         invariant = min_invariant;
 
     }
-    //
+    
     return {invariant, G};
 
 }
@@ -976,13 +979,13 @@ void Cabaret_scheme<LeftBT, RightBT>::third_phase(int t_idx) {
     for(int i = 0; i < (cnt_x_pts - 1); ++i) {
 
         //Вычисление h на новом временном слое в центре отрезка
-        conservative_h_grid[i] = center_conservative_h_grid[i] + tau_grid[t_idx] / 2.0 * (stream_h_grid[i] * stream_u_grid[i] -
+        conservative_h_grid[i] = center_conservative_h_grid[i] + tau_grid[t_idx] * 0.5 * (stream_h_grid[i] * stream_u_grid[i] -
             stream_h_grid[i + 1] * stream_u_grid[i + 1]) / h_grid[i];
 
         // Вычисление u на новом временном слое в центре отрезка
-        conservative_u_grid[i] = (center_conservative_h_grid[i] * center_conservative_u_grid[i] + tau_grid[t_idx] / 2.0 * (stream_h_grid[i] * 
+        conservative_u_grid[i] = (center_conservative_h_grid[i] * center_conservative_u_grid[i] + tau_grid[t_idx] * 0.5 * (stream_h_grid[i] * 
             sqr(stream_u_grid[i]) - stream_h_grid[i + 1] * sqr(stream_u_grid[i + 1]) + g * (stream_h_grid[i] + 
-            stream_h_grid[i + 1]) / 2.0 * (stream_z_grid[i] + stream_h_grid[i] - stream_z_grid[i + 1] - stream_h_grid[i + 1])) / 
+            stream_h_grid[i + 1]) * 0.5 * (stream_z_grid[i] + stream_h_grid[i] - stream_z_grid[i + 1] - stream_h_grid[i + 1])) / 
             h_grid[i]) / conservative_h_grid[i];
 
 

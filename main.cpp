@@ -115,75 +115,75 @@ main() {
     //
 
 
-    // //Проверка порядка аппроксимации(распад гаусса)
-    // Type_grid type_grid = EVEN;
-    // double CFL = 0.3;
-    // double break_pt = 5.0;
-    // double (* u_0_left)(double) = u_1;
-    // double (* u_0_right)(double) = u_2;
-    // double (* h_0_left)(double) = h_1;
-    // double (* h_0_right)(double) = h_2;
-    // double (* z)(double) = z_const;
-    // Boundary<BoundaryType::NON_LEAK> left_boundary;
-    // Boundary<BoundaryType::NON_LEAK> right_boundary;
+    //Проверка порядка аппроксимации(распад гаусса)
+    Type_grid type_grid = EVEN;
+    double CFL = 0.3;
+    double break_pt = 10.0;
+    double (* u_0_left)(double) = u_1;
+    double (* u_0_right)(double) = u_2;
+    double (* h_0_left)(double) = h_1;
+    double (* h_0_right)(double) = h_2;
+    double (* z)(double) = z_const;
+    Boundary<BoundaryType::NON_LEAK> left_boundary;
+    Boundary<BoundaryType::NON_LEAK> right_boundary;
 
-    // double start_x_pt = 0.0;
-    // double end_x_pt = 20.0;
-    // double start_t_pt = 0.0;
-    // double end_t_pt = 1.0;
-    // // double start_cmp_seg = 6.0;
-    // // double end_cmp_seg = 14.0;
-    // int cnt_x_pts_before_break_pt = 100;
-    // int cnt_x_pts_after_break_pt = 100;
-    // bool continuity = true;
+    double start_x_pt = 0.0;
+    double end_x_pt = 40.0;
+    double start_t_pt = 0.0;
+    double end_t_pt = 4.0;
+    // double start_cmp_seg = 6.0;
+    // double end_cmp_seg = 14.0;
+    int cnt_x_pts_before_break_pt = 200;
+    int cnt_x_pts_after_break_pt = 200;
+    bool continuity = true;
 
-    // std::string file_name = "./data/approx_order";
-    // Cabaret_scheme<BoundaryType::NON_LEAK, BoundaryType::NON_LEAK> cabaret_scheme_1(type_grid
-    //     , left_boundary
-    //     , right_boundary
-    //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
-    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt
-    //     , file_name, continuity, nullptr);
-    // cabaret_scheme_1.compute();
-    // Row value_cabaret_scheme = cabaret_scheme_1.conservative_value(H);
+    std::string file_name = "./data/approx_order";
+    Cabaret_scheme<BoundaryType::NON_LEAK, BoundaryType::NON_LEAK> cabaret_scheme_1(type_grid
+        , left_boundary
+        , right_boundary
+        , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
+        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt
+        , file_name, continuity, nullptr);
+    cabaret_scheme_1.compute();
+    Row value_cabaret_scheme = cabaret_scheme_1.conservative_value(H);
 
 
 
-    // Cabaret_scheme<BoundaryType::NON_LEAK, BoundaryType::NON_LEAK> cabaret_scheme_2(type_grid
-    //     , left_boundary
-    //     , right_boundary
-    //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
-    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 2 + 1, cnt_x_pts_after_break_pt * 2 + 1
-    //     , file_name, continuity, nullptr);
-    // cabaret_scheme_2.compute();
-    // Row value_cabaret_scheme_2 = cabaret_scheme_2.conservative_value(H);
-    // Row interp_value_cabaret_scheme_2 = Row(value_cabaret_scheme.size());
-    // interpolate_half_sum_row(value_cabaret_scheme_2, interp_value_cabaret_scheme_2);
+    Cabaret_scheme<BoundaryType::NON_LEAK, BoundaryType::NON_LEAK> cabaret_scheme_2(type_grid
+        , left_boundary
+        , right_boundary
+        , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
+        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 2 + 1, cnt_x_pts_after_break_pt * 2 + 1
+        , file_name, continuity, nullptr);
+    cabaret_scheme_2.compute();
+    Row value_cabaret_scheme_2 = cabaret_scheme_2.conservative_value(H);
+    Row interp_value_cabaret_scheme_2 = Row(value_cabaret_scheme.size());
+    interpolate_half_sum_row(value_cabaret_scheme_2, interp_value_cabaret_scheme_2);
 
 
 
     
-    // Cabaret_scheme<BoundaryType::NON_LEAK, BoundaryType::NON_LEAK> cabaret_scheme_4(type_grid
-    //     , left_boundary
-    //     , right_boundary
-    //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
-    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 4 + 3, cnt_x_pts_after_break_pt * 4 + 3
-    //     , file_name, continuity, nullptr);
-    // cabaret_scheme_4.compute();
-    // Row value_cabaret_scheme_4 = cabaret_scheme_4.conservative_value(H);
-    // Row interp_value_cabaret_scheme_4 = Row(value_cabaret_scheme_2.size());
-    // interpolate_half_sum_row(value_cabaret_scheme_4, interp_value_cabaret_scheme_4);
-    // double h1 = (end_x_pt - start_x_pt) / (cnt_x_pts_before_break_pt + cnt_x_pts_after_break_pt + 2);
-    // double h2 = h1 * 0.5;
-    // Row err1 = value_cabaret_scheme - interp_value_cabaret_scheme_2;
-    // Row err2 = value_cabaret_scheme_2 - interp_value_cabaret_scheme_4;
-    // save_vec(file_name + "_conservative/err_h.dat", "err", err1, cabaret_scheme_1.get_conservative_x_grid());
-    // save_vec(file_name + "_conservative/err_h0.5.dat", "err", err2, cabaret_scheme_2.get_conservative_x_grid());
-    // double norm_1 = l2_norm(err1, h1);
-    // double norm_2 = l2_norm(err2, h2);
-    // double approx_order = std::log2(norm_1 / norm_2);
-    // std::cout << "Порядок аппроксимации схемы: " << approx_order << std::endl << norm_1 << ' ' << norm_2 << std::endl;
-    // //
+    Cabaret_scheme<BoundaryType::NON_LEAK, BoundaryType::NON_LEAK> cabaret_scheme_4(type_grid
+        , left_boundary
+        , right_boundary
+        , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
+        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 4 + 3, cnt_x_pts_after_break_pt * 4 + 3
+        , file_name, continuity, nullptr);
+    cabaret_scheme_4.compute();
+    Row value_cabaret_scheme_4 = cabaret_scheme_4.conservative_value(H);
+    Row interp_value_cabaret_scheme_4 = Row(value_cabaret_scheme_2.size());
+    interpolate_half_sum_row(value_cabaret_scheme_4, interp_value_cabaret_scheme_4);
+    double h1 = (end_x_pt - start_x_pt) / (cnt_x_pts_before_break_pt + cnt_x_pts_after_break_pt + 2);
+    double h2 = h1 * 0.5;
+    Row err1 = value_cabaret_scheme - interp_value_cabaret_scheme_2;
+    Row err2 = value_cabaret_scheme_2 - interp_value_cabaret_scheme_4;
+    save_vec(file_name + "_conservative/err_h.dat", "err", err1, cabaret_scheme_1.get_conservative_x_grid());
+    save_vec(file_name + "_conservative/err_h0.5.dat", "err", err2, cabaret_scheme_2.get_conservative_x_grid());
+    double norm_1 = l2_norm(err1, h1);
+    double norm_2 = l2_norm(err2, h2);
+    double approx_order = std::log2(norm_1 / norm_2);
+    std::cout << "Порядок аппроксимации схемы: " << approx_order << std::endl << norm_1 << ' ' << norm_2 << std::endl;
+    //
 
 
     //Проверка порядка аппроксимации(две волны разряжения)
@@ -263,72 +263,72 @@ main() {
     //           << std::endl << automodel_err_2 << ' ' << automodel_err_4 << std::endl; 
     //
 
-    //Тест одна волна разряжения(one discharge wave)
-    Type_grid type_grid = EVEN;
-    double CFL = 0.3;
-    double break_pt = 0.0;
-    double (* z)(double) = z_const;
-    Boundary<BoundaryType::FREE_EXIT> left_boundary;
-    Boundary<BoundaryType::FREE_EXIT> right_boundary;
+    // //Тест одна волна разряжения(one discharge wave)
+    // Type_grid type_grid = EVEN;
+    // double CFL = 0.3;
+    // double break_pt = 0.0;
+    // double (* z)(double) = z_const;
+    // Boundary<BoundaryType::FREE_EXIT> left_boundary;
+    // Boundary<BoundaryType::FREE_EXIT> right_boundary;
 
-    double start_x_pt = -10.0;
-    double end_x_pt = 10.0;
-    double start_t_pt = 0.0;
-    double end_t_pt = 1.0;
-    // double start_cmp_seg = 6.0;
-    // double end_cmp_seg = 14.0;
-    int cnt_x_pts_before_break_pt = 100;
-    int cnt_x_pts_after_break_pt = 100;
-    bool continuity = false; // флаг разрыва начальных данных в узле разрыва храним полусумму величин в начальный момент времени
+    // double start_x_pt = -10.0;
+    // double end_x_pt = 10.0;
+    // double start_t_pt = 0.0;
+    // double end_t_pt = 1.0;
+    // // double start_cmp_seg = 6.0;
+    // // double end_cmp_seg = 14.0;
+    // int cnt_x_pts_before_break_pt = 100;
+    // int cnt_x_pts_after_break_pt = 100;
+    // bool continuity = false; // флаг разрыва начальных данных в узле разрыва храним полусумму величин в начальный момент времени
 
-    std::string file_name = "./data/one_discharge_wave_1";
-    Cabaret_scheme<BoundaryType::FREE_EXIT, BoundaryType::FREE_EXIT> cabaret_scheme_1(type_grid
-        , left_boundary
-        , right_boundary
-        , CFL, break_pt, one_wave_u, one_wave_u, one_wave_h, one_wave_h, z
-        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt
-        , file_name, continuity, nullptr);
-    cabaret_scheme_1.compute();
-    double automodel_err_1 = cabaret_scheme_1.automodeling_solution(-10.0, 10.0);
-    Row value_cabaret_scheme = cabaret_scheme_1.conservative_value(H);
+    // std::string file_name = "./data/one_discharge_wave_1";
+    // Cabaret_scheme<BoundaryType::FREE_EXIT, BoundaryType::FREE_EXIT> cabaret_scheme_1(type_grid
+    //     , left_boundary
+    //     , right_boundary
+    //     , CFL, break_pt, one_wave_u, one_wave_u, one_wave_h, one_wave_h, z
+    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt
+    //     , file_name, continuity, nullptr);
+    // cabaret_scheme_1.compute();
+    // double automodel_err_1 = cabaret_scheme_1.automodeling_solution(-10.0, 10.0);
+    // Row value_cabaret_scheme = cabaret_scheme_1.conservative_value(H);
 
-    file_name =  "./data/one_discharge_wave_2";
-    Cabaret_scheme<BoundaryType::FREE_EXIT, BoundaryType::FREE_EXIT> cabaret_scheme_2(type_grid
-        , left_boundary
-        , right_boundary
-        , CFL, break_pt, one_wave_u, one_wave_u, one_wave_h, one_wave_h, z
-        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 2 + 1, cnt_x_pts_after_break_pt * 2 + 1
-        , file_name, continuity, nullptr);
-    cabaret_scheme_2.compute();
-    double automodel_err_2 = cabaret_scheme_2.automodeling_solution(-10.0, 10.0);
-    Row value_cabaret_scheme_2 = cabaret_scheme_2.conservative_value(H);
-    Row interp_value_cabaret_scheme_2 = Row(value_cabaret_scheme.size());
-    interpolate_half_sum_row(value_cabaret_scheme_2, interp_value_cabaret_scheme_2);
+    // file_name =  "./data/one_discharge_wave_2";
+    // Cabaret_scheme<BoundaryType::FREE_EXIT, BoundaryType::FREE_EXIT> cabaret_scheme_2(type_grid
+    //     , left_boundary
+    //     , right_boundary
+    //     , CFL, break_pt, one_wave_u, one_wave_u, one_wave_h, one_wave_h, z
+    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 2 + 1, cnt_x_pts_after_break_pt * 2 + 1
+    //     , file_name, continuity, nullptr);
+    // cabaret_scheme_2.compute();
+    // double automodel_err_2 = cabaret_scheme_2.automodeling_solution(-10.0, 10.0);
+    // Row value_cabaret_scheme_2 = cabaret_scheme_2.conservative_value(H);
+    // Row interp_value_cabaret_scheme_2 = Row(value_cabaret_scheme.size());
+    // interpolate_half_sum_row(value_cabaret_scheme_2, interp_value_cabaret_scheme_2);
 
-    file_name =  "./data/one_discharge_wave_4";
-    Cabaret_scheme<BoundaryType::FREE_EXIT, BoundaryType::FREE_EXIT> cabaret_scheme_4(type_grid
-        , left_boundary
-        , right_boundary
-        , CFL, break_pt, one_wave_u, one_wave_u, one_wave_h, one_wave_h, z
-        , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 4 + 3, cnt_x_pts_after_break_pt * 4 + 3
-        , file_name, continuity, nullptr);
-    cabaret_scheme_4.compute();
-    double automodel_err_4 = cabaret_scheme_4.automodeling_solution(-10.0, 10.0);
-    Row value_cabaret_scheme_4 = cabaret_scheme_4.conservative_value(H);
-    Row interp_value_cabaret_scheme_4 = Row(value_cabaret_scheme_2.size());
-    interpolate_half_sum_row(value_cabaret_scheme_4, interp_value_cabaret_scheme_4);
-    double h1 = (end_x_pt - start_x_pt) / (cnt_x_pts_before_break_pt + cnt_x_pts_after_break_pt + 2);
-    double h2 = h1 * 0.5;
-    Row err1 = value_cabaret_scheme - interp_value_cabaret_scheme_2;
-    Row err2 = value_cabaret_scheme_2 - interp_value_cabaret_scheme_4;
-    save_vec("./data/one_wave_conservative_err_h.dat", "err", err1, cabaret_scheme_1.get_conservative_x_grid());
-    save_vec("./data/one_wave_conservative_err_h0.5.dat", "err", err2, cabaret_scheme_2.get_conservative_x_grid());
-    double norm_1 = l2_norm(err1, h1);
-    double norm_2 = l2_norm(err2, h2);
-    double approx_order = std::log2(norm_1 / norm_2);
-    std::cout << "Порядок аппроксимации схемы: " << approx_order << std::endl;
-    std::cout << "Порядок аппроксимации на обычной и дробленной сетке сравнение с точным решением: " << std::log2(automodel_err_1 / automodel_err_2) << std::endl; 
-    std::cout << "Порядок аппроксимации на дробленной и сильно дробленной сетке сравнение с точным решением: " << std::log2(automodel_err_2 / automodel_err_4) << std::endl; 
+    // file_name =  "./data/one_discharge_wave_4";
+    // Cabaret_scheme<BoundaryType::FREE_EXIT, BoundaryType::FREE_EXIT> cabaret_scheme_4(type_grid
+    //     , left_boundary
+    //     , right_boundary
+    //     , CFL, break_pt, one_wave_u, one_wave_u, one_wave_h, one_wave_h, z
+    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt * 4 + 3, cnt_x_pts_after_break_pt * 4 + 3
+    //     , file_name, continuity, nullptr);
+    // cabaret_scheme_4.compute();
+    // double automodel_err_4 = cabaret_scheme_4.automodeling_solution(-10.0, 10.0);
+    // Row value_cabaret_scheme_4 = cabaret_scheme_4.conservative_value(H);
+    // Row interp_value_cabaret_scheme_4 = Row(value_cabaret_scheme_2.size());
+    // interpolate_half_sum_row(value_cabaret_scheme_4, interp_value_cabaret_scheme_4);
+    // double h1 = (end_x_pt - start_x_pt) / (cnt_x_pts_before_break_pt + cnt_x_pts_after_break_pt + 2);
+    // double h2 = h1 * 0.5;
+    // Row err1 = value_cabaret_scheme - interp_value_cabaret_scheme_2;
+    // Row err2 = value_cabaret_scheme_2 - interp_value_cabaret_scheme_4;
+    // save_vec("./data/one_wave_conservative_err_h.dat", "err", err1, cabaret_scheme_1.get_conservative_x_grid());
+    // save_vec("./data/one_wave_conservative_err_h0.5.dat", "err", err2, cabaret_scheme_2.get_conservative_x_grid());
+    // double norm_1 = l2_norm(err1, h1);
+    // double norm_2 = l2_norm(err2, h2);
+    // double approx_order = std::log2(norm_1 / norm_2);
+    // std::cout << "Порядок аппроксимации схемы: " << approx_order << std::endl;
+    // std::cout << "Порядок аппроксимации на обычной и дробленной сетке сравнение с точным решением: " << std::log2(automodel_err_1 / automodel_err_2) << std::endl; 
+    // std::cout << "Порядок аппроксимации на дробленной и сильно дробленной сетке сравнение с точным решением: " << std::log2(automodel_err_2 / automodel_err_4) << std::endl; 
 
 
     // std::string file_name = "./data/hydrajumps";
