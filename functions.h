@@ -98,5 +98,7 @@ double x_b(double t);
 
 double x_c(double t);
 
+double z_uneven(double x);
+
 
 #endif

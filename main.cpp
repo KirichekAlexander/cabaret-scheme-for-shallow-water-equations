@@ -39,7 +39,7 @@ main() {
     
 
 
-    // // Dam break tests
+    // Dam break tests
     // Type_grid type_grid = EVEN;
     // double CFL = 0.3;
     // double break_pt = 5.0;
@@ -58,8 +58,8 @@ main() {
     // double end_t_pt = 6.0;
     // // double start_cmp_seg = 6.0;
     // // double end_cmp_seg = 14.0;
-    // int cnt_x_pts_before_break_pt = 200;
-    // int cnt_x_pts_after_break_pt = 200;
+    // int cnt_x_pts_before_break_pt = 50;
+    // int cnt_x_pts_after_break_pt = 50;
     // bool continuity = false;
 
     // std::string file_name = "./data/4.1.1";
@@ -69,7 +69,7 @@ main() {
     //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
     //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, analytical_solution);
     // double err1 = cabaret_scheme_1.compute();
-    // // cabaret_scheme_1.automodeling_solution(0.0, 10.0);
+    // cabaret_scheme_1.automodeling_solution(0.0, 10.0);
 
     // Cabaret_scheme<BoundaryType::DEFAULT, BoundaryType::DEFAULT> cabaret_scheme_2(type_grid
     //     , left_boundary
@@ -128,13 +128,13 @@ main() {
     Boundary<BoundaryType::NON_LEAK> right_boundary;
 
     double start_x_pt = 0.0;
-    double end_x_pt = 40.0;
+    double end_x_pt = 20.0;
     double start_t_pt = 0.0;
-    double end_t_pt = 4.0;
+    double end_t_pt = 1.0;
     // double start_cmp_seg = 6.0;
     // double end_cmp_seg = 14.0;
-    int cnt_x_pts_before_break_pt = 200;
-    int cnt_x_pts_after_break_pt = 200;
+    int cnt_x_pts_before_break_pt = 512;
+    int cnt_x_pts_after_break_pt = 512;
     bool continuity = true;
 
     std::string file_name = "./data/approx_order";
@@ -183,7 +183,7 @@ main() {
     double norm_2 = l2_norm(err2, h2);
     double approx_order = std::log2(norm_1 / norm_2);
     std::cout << "Порядок аппроксимации схемы: " << approx_order << std::endl << norm_1 << ' ' << norm_2 << std::endl;
-    //
+    
 
 
     //Проверка порядка аппроксимации(две волны разряжения)
@@ -330,6 +330,38 @@ main() {
     // std::cout << "Порядок аппроксимации на обычной и дробленной сетке сравнение с точным решением: " << std::log2(automodel_err_1 / automodel_err_2) << std::endl; 
     // std::cout << "Порядок аппроксимации на дробленной и сильно дробленной сетке сравнение с точным решением: " << std::log2(automodel_err_2 / automodel_err_4) << std::endl; 
 
+
+    // // Тест разрыв над наклонным дном
+    // Type_grid type_grid = EVEN;
+    // double CFL = 0.3;
+    // double break_pt = 5.0;
+    // double (* u_0_left)(double) = u_0_411_left_right;
+    // double (* u_0_right)(double) = u_0_411_left_right;
+    // double (* h_0_left)(double) = h_0_411_left;
+    // double (* h_0_right)(double) = h_0_411_right;
+    // double (* z)(double) = z_uneven;
+    // //4.1.1.
+    // Boundary<BoundaryType::DEFAULT> left_boundary(0.005, 0.0);
+    // Boundary<BoundaryType::DEFAULT> right_boundary(0.001, 0.0);
+
+    // double start_x_pt = 0.0;
+    // double end_x_pt = 10.0;
+    // double start_t_pt = 0.0;
+    // double end_t_pt = 6.0;
+    // // double start_cmp_seg = 6.0;
+    // // double end_cmp_seg = 14.0;
+    // int cnt_x_pts_before_break_pt = 50;
+    // int cnt_x_pts_after_break_pt = 50;
+    // bool continuity = false;
+
+    // std::string file_name = "./data/4.1.1__2z_uneven";
+    // Cabaret_scheme<BoundaryType::DEFAULT, BoundaryType::DEFAULT> cabaret_scheme_1(type_grid
+    //     , left_boundary
+    //     , right_boundary
+    //     , CFL, break_pt, u_0_left, u_0_right, h_0_left, h_0_right, z
+    //     , start_x_pt, end_x_pt, start_t_pt, end_t_pt, cnt_x_pts_before_break_pt, cnt_x_pts_after_break_pt, file_name, continuity, nullptr);
+    // double err1 = cabaret_scheme_1.compute();
+    // cabaret_scheme_1.automodeling_solution(0.0, 10.0);
 
     // std::string file_name = "./data/hydrajumps";
     // Cabaret_scheme cabaret_scheme_1(type_grid, NON_LEAK, CFL, break_pt

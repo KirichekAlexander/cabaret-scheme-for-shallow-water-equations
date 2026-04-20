@@ -235,6 +235,10 @@ double x_c(double t) {
 
 //
 
+double z_uneven(double x) {
+    return 0.00005 * x;
+}
+
 
 
 #pragma GCC diagnostic pop

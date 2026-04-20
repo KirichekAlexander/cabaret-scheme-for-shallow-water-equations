@@ -617,7 +617,7 @@ void Cabaret_scheme<LeftBT, RightBT>::phases() {
                 }
 
                 Row err = (analytical_solution ? analytical_solution_conservative_h_grid - conservative_h_grid : Row(0));
-                std::cout << "TIME LAYER: " << t_grid[t_idx] << std::endl;
+                // std::cout << "TIME LAYER: " << t_grid[t_idx] << std::endl;
                 //Сохранение решения схемы
                 file_manager.save_layer(file_name + "_conservative/" + std::to_string(cnt_x_pts - 1), 0, cnt_x_pts - 1, t_idx, t_grid[t_idx]
                                       , conservative_x_grid, conservative_h_grid, conservative_u_grid, conservative_z_grid, (analytical_solution ? &err : nullptr));
@@ -958,15 +958,15 @@ std::pair<double, double> Cabaret_scheme<LeftBT, RightBT>::compute_invariant(Typ
     double min_invariant = std::min({cell_left_invariant, cell_conservative_invariant, cell_right_invariant}) + additional_term;
     double max_invariant = std::max({cell_left_invariant, cell_conservative_invariant, cell_right_invariant}) + additional_term;
 
-    if (invariant > max_invariant) {
+    // if (invariant > max_invariant) {
 
-        invariant = max_invariant;
+    //     invariant = max_invariant;
 
-    } else if (invariant < min_invariant) {
+    // } else if (invariant < min_invariant) {
 
-        invariant = min_invariant;
+    //     invariant = min_invariant;
 
-    }
+    // }
     
     return {invariant, G};
 
