@@ -220,8 +220,8 @@ void CabaretScheme2D::init_fields(int i1, int i2,
             z[i][j] = z0(x[i], y[j]);
             points[i][j].u = u0(x[i], y[j]);
             points[i][j].v = v0(x[i], y[j]);
-            // points[i][j].h = h0(x[i], y[j]);
-            points[i][j].h = 1.0 - z[i][j]; // well-balanced init
+            points[i][j].h = h0(x[i], y[j]);
+            // points[i][j].h = 1.0 - z[i][j]; // well-balanced init
         }
     }
 
@@ -242,8 +242,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_x[0][j].u = 0.0;
             face_x[0][j].v = v0(x_face_x[0], y_center[j]);
-            // face_x[0][j].h = h0(x_face_x[0], y_center[j]);
-            face_x[0][j].h = 1.0 - z_face_x[0][j]; // well-balanced init
+            face_x[0][j].h = h0(x_face_x[0], y_center[j]);
+            // face_x[0][j].h = 1.0 - z_face_x[0][j]; // well-balanced init
 
         }    
 
@@ -257,8 +257,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_x[nx][j].u = 0.0;
             face_x[nx][j].v = v0(x_face_x[nx], y_center[j]);
-            // face_x[nx][j].h = h0(x_face_x[nx], y_center[j]);
-            face_x[nx][j].h = 1.0 - z_face_x[nx][j]; // well-balanced init
+            face_x[nx][j].h = h0(x_face_x[nx], y_center[j]);
+            // face_x[nx][j].h = 1.0 - z_face_x[nx][j]; // well-balanced init
 
         }    
 
@@ -272,8 +272,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_y[i][ny].u = u0(x_center[i], y_face_y[ny]);
             face_y[i][ny].v = 0.0;
-            // face_y[i][ny].h = h0(x_center[i], y_face_y[ny]);
-            face_y[i][ny].h = 1.0 - z_face_y[i][ny]; // well-balanced init
+            face_y[i][ny].h = h0(x_center[i], y_face_y[ny]);
+            // face_y[i][ny].h = 1.0 - z_face_y[i][ny]; // well-balanced init
 
         }    
 
@@ -287,8 +287,8 @@ void CabaretScheme2D::init_boundaries(Side side) {
             
             face_y[i][0].u = u0(x_center[i], y_face_y[0]);
             face_y[i][0].v = 0.0;
-            // face_y[i][0].h = h0(x_center[i], y_face_y[0]);
-            face_y[i][0].h = 1.0 - z_face_y[i][0]; // well-balanced init
+            face_y[i][0].h = h0(x_center[i], y_face_y[0]);
+            // face_y[i][0].h = 1.0 - z_face_y[i][0]; // well-balanced init
 
         }    
 
@@ -334,16 +334,40 @@ CellView CabaretScheme2D::get_next_cell(int i, int j) {
 
 void CabaretScheme2D::compute() {
 
+    int periods = 0;
+    double period = 0.467;
+    std::cout << " h_0=" << h0(0.0, 0.0) << std::endl; 
     while(t < T) {
 
         dt = compute_time_step();
+
+        if (t >= period * periods) {
+
+            double min_value_h = center[0][0].h;
+
+            for (Field1D& row : center) {
+
+                for (Point3 x : row) {
+
+                    if (x.h < min_value_h) {
+
+                        min_value_h = x.h;
+
+                    }
+
+                }
+
+            }
+            std::cout << " periods=" << periods << " min_h=" << min_value_h << std::endl;
+            ++periods;
+        }
 
         first_phase();
         second_phase();
         third_phase();
 
         ++num_layer;
-        std::cout << "t: " << t << " layer: " << num_layer << std::endl;
+        // std::cout << "t: " << t << " layer: " << num_layer << std::endl;
         t += dt;
 
         file_manager.save_layer(file_name, 0, num_layer, t, x_center, y_center, z_center, center);
