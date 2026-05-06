@@ -195,12 +195,12 @@ double u_0_411_left_right(double x) {
 
 
 double h_0_411_left(double x) {
-    return 0.005;
+    return 5.0;
 }
 
 
 double h_0_411_right(double x) {
-    return 0.001;
+    return 1.0;
 }
 
 //analytical solution
@@ -236,7 +236,7 @@ double x_c(double t) {
 //
 
 double z_uneven(double x) {
-    return 0.00005 * x;
+    return 0.05 * x;
 }
 
 

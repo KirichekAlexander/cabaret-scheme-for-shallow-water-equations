@@ -7,8 +7,8 @@
 
 
 //Ускорение свободного падения
-// const double g = 9.81;
-const double g = 1.0;
+const double g = 9.81;
+// const double g = 1.0;
 
 double one_wave_h(double x);
 
