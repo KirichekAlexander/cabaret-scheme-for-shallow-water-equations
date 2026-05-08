@@ -336,12 +336,13 @@ void CabaretScheme2D::compute() {
 
     int periods = 0;
     double period = 0.467;
+    int part_period = 0;
     std::cout << " h_0=" << h0(0.0, 0.0) << std::endl; 
     while(t < T) {
 
         dt = compute_time_step();
 
-        if (t >= period * periods) {
+        if (t >= period * (periods) + period / 7.0 * part_period) {
 
             double min_value_h = center[0][0].h;
 
@@ -358,8 +359,13 @@ void CabaretScheme2D::compute() {
                 }
 
             }
-            std::cout << " periods=" << periods << " min_h=" << min_value_h << std::endl;
-            ++periods;
+            std::cout <<" t=" << t << " periods=" << periods << " part_period=" << part_period << " min_h=" << min_value_h << std::endl;
+            if (part_period == 6) {
+                part_period = 0;
+                ++periods;
+            } else {
+                ++part_period;
+            }
         }
 
         first_phase();

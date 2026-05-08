@@ -7,7 +7,7 @@
 
 
 //Ускорение свободного падения
-const double g = 1;
+const double g = 1.0;
 
 
 double z_const(double x);
