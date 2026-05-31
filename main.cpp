@@ -52,7 +52,7 @@ main() {
     double (* u_0_right)(double) = u_0_411_left_right;
     double (* h_0_left)(double) = h_0_411_left;
     double (* h_0_right)(double) = h_0_411_right;
-    double (* z)(double) = z_uneven;
+    double (* z)(double) = z_const;
     //4.1.1.
     Boundary<BoundaryType::FREE_EXIT> left_boundary;
     Boundary<BoundaryType::FREE_EXIT> right_boundary;
@@ -60,7 +60,7 @@ main() {
     double start_x_pt = 0.0;
     double end_x_pt = 10.0;
     double start_t_pt = 0.0;
-    double end_t_pt = 0.25;
+    double end_t_pt = 0.17;
     // double start_cmp_seg = 6.0;
     // double end_cmp_seg = 14.0;
     int cnt_x_pts_before_break_pt = 50;
